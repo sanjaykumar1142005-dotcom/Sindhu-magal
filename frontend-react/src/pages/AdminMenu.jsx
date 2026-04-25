@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
+import API_URL from '../config';
 
 const AdminMenu = () => {
     const [items, setItems] = useState([]);
@@ -10,7 +11,7 @@ const AdminMenu = () => {
     const [msg, setMsg] = useState('');
     const navigate = useNavigate();
 
-    const API = "http://192.168.0.179:5000";
+    const API = API_URL;
 
     useEffect(() => {
         const role = localStorage.getItem("role");
@@ -37,7 +38,10 @@ const AdminMenu = () => {
     };
 
     const handleAdd = async () => {
-        if (!newItem.name || !newItem.price) return;
+        if (!newItem.name || !newItem.price) {
+            setMsg("Please fill name and price");
+            return;
+        }
         try {
             const res = await fetch(`${API}/admin/menu`, {
                 method: 'POST',
@@ -101,6 +105,13 @@ const AdminMenu = () => {
     return (
         <div className="min-h-screen bg-slate-900 text-white p-4 md:p-8">
             <div className="max-w-4xl mx-auto">
+                <div className="bg-orange-500/10 border border-orange-500/20 p-4 rounded-xl mb-6 flex items-center gap-3">
+                    <span className="text-2xl">💡</span>
+                    <p className="text-sm text-orange-200">
+                        <strong>Note:</strong> A service charge of ₹40 per head is included in the Food Total but not shown separately on the bill.
+                    </p>
+                </div>
+                
                 <div className="flex justify-between items-center mb-8">
                     <div className="flex items-center gap-3">
                         <img 
@@ -131,7 +142,7 @@ const AdminMenu = () => {
                             placeholder="Price"
                             className="bg-black/40 p-3 rounded border border-white/10"
                             value={newItem.price}
-                            onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
+                            onChange={(e) => setNewItem({ ...newItem, price: parseInt(e.target.value) || '' })}
                         />
                         <select
                             className="bg-black/40 p-3 rounded border border-white/10"
@@ -165,7 +176,7 @@ const AdminMenu = () => {
                                                     className="bg-black p-1 rounded border border-white/20 w-20"
                                                     type="number"
                                                     value={editingItem.price}
-                                                    onChange={e => setEditingItem({ ...editingItem, price: e.target.value })}
+                                                    onChange={e => setEditingItem({ ...editingItem, price: parseInt(e.target.value) || 0 })}
                                                 />
                                                 <Button onClick={handleUpdate} variant="success" size="sm">Save</Button>
                                                 <Button onClick={() => setEditingItem(null)} variant="glass" size="sm">Cancel</Button>

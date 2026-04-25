@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* Global Styles */
 body {
     margin: 0;
@@ -526,17 +528,55 @@ body {
     }
 }
 
-/* PRINT */
 @media print {
-    body * { visibility: hidden !important; }
-    #printArea, #printArea * { visibility: visible !important; }
+    body, html {
+        background: white !important;
+        height: auto !important;
+    }
+
+    .menu-bg { 
+        background: white !important; 
+        background-image: none !important;
+        min-height: auto !important;
+    }
+
+    .menu-ui::before { 
+        display: none !important; 
+    }
+
+    .hide-on-print {
+        display: none !important;
+    }
+
+    .print-modal-wrapper {
+        position: static !important;
+        background: white !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    .print-modal-content {
+        box-shadow: none !important;
+        width: 100% !important;
+        max-width: none !important;
+        border: none !important;
+        background: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        max-height: none !important;
+    }
+
     #printArea {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background: white;
-        color: black;
-        padding: 20px;
+        border: none !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 }

@@ -1,29 +1,30 @@
+require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
-// ✅ Middleware
+// Middleware
 app.use(express.json());
 app.use(cors());
 
-// 🔗 PostgreSQL Connection
+// PostgreSQL Connection
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "authdb",
-  password: "1234",
-  port: 5432
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT
 });
 
-// ✅ Test route
+// Test route
 app.get("/", (req, res) => {
   res.send("Backend working ✅");
 });
 
-// 📝 SIGNUP API
+// SIGNUP API
 app.post("/signup", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -44,20 +45,20 @@ app.post("/signup", async (req, res) => {
       [email, password, 'user']
     );
 
-    res.json({ success: true, message: "User created successfully! 🎉" });
+    res.json({ success: true, message: "User created successfully!" });
 
   } catch (error) {
-    console.error("🔥 Signup Error:", error);
+    console.error("Signup Error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-// 🔐 LOGIN API
+// LOGIN API
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    console.log("📥    Login request:", email, password);
+    console.log("Login request:", email, password);
 
     // 1. Validate
     if (!email || !password) {
@@ -73,7 +74,7 @@ app.post("/login", async (req, res) => {
       [email]
     );
 
-    // ❌ User not found
+    // User not found
     if (result.rows.length === 0) {
       return res.status(401).json({
         success: false,
@@ -83,7 +84,7 @@ app.post("/login", async (req, res) => {
 
     const user = result.rows[0];
 
-    // ❌ Password mismatch
+    // Password mismatch
     if (password !== user.password) {
       return res.status(401).json({
         success: false,
@@ -91,11 +92,11 @@ app.post("/login", async (req, res) => {
       });
     }
 
-    // ✅ Success
+    // Success
     return res.json({
       success: true,
       message: "Login successful 🎉",
-      token: "abc123",
+      token: process.env.ADMIN_TOKEN || "abc123",
       role: user.role,
       user: {
         email: user.email,
@@ -104,7 +105,7 @@ app.post("/login", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("🔥 Server Error:", error);
+    console.error(" Server Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -137,7 +138,7 @@ app.post("/admin/menu", async (req, res) => {
     const { id, name, price, category } = req.body;
     // Simple check (in production use real JWT auth)
     const token = req.headers.authorization;
-    if (token !== "abc123") {
+    if (token !== (process.env.ADMIN_TOKEN || "abc123")) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
@@ -167,7 +168,7 @@ app.delete("/admin/menu/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const token = req.headers.authorization;
-    if (token !== "abc123") {
+    if (token !== (process.env.ADMIN_TOKEN || "abc123")) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
@@ -180,6 +181,6 @@ app.delete("/admin/menu/:id", async (req, res) => {
 });
 
 // 🚀 Start server
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on http://127.0.0.1:${PORT}`);
 });

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../components/Button';
+import API_URL from '../config';
 
 const Signup = () => {
     const [email, setEmail] = useState("");
@@ -8,7 +9,7 @@ const Signup = () => {
     const [msg, setMsg] = useState("");
     const navigate = useNavigate();
 
-    const API = "http://192.168.0.179:5000";
+    const API = API_URL;
 
     const handleSignup = async () => {
         if (!email || !password) {

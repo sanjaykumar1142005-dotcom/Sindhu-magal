@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
+import API_URL from '../config';
 
 const Menu = () => {
     const [data, setData] = useState({
@@ -19,14 +20,24 @@ const Menu = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
     const role = localStorage.getItem("role");
+    const EB_CHARGES = 2500;
+
+    useEffect(() => {
+        if (isBillOpen || isHistoryOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+    }, [isBillOpen, isHistoryOpen]);
 
     useEffect(() => {
         // Fetch Menu from Backend
         const fetchMenu = async () => {
             try {
-                const response = await fetch("http://192.168.0.179:5000/menu");
+                const response = await fetch(`${API_URL}/menu`);
                 const result = await response.json();
                 if (result.success) {
+                    const SERVICE_CHARGE = 40;
                     const grouped = {
                         breakfast: result.data.filter(i => i.category === 'breakfast').map(i => [i.name, i.price]),
                         lunch: result.data.filter(i => i.category === 'lunch').map(i => [i.name, i.price]),
@@ -48,8 +59,8 @@ const Menu = () => {
 
     const getHallRent = (m) => {
         if (m <= 150) return 7500;
-        else if (m <= 159) return 5000;
-        else return 2500;
+        if (m <= 200) return 5000;
+        return 2500;
     };
 
     const getItemQty = (name) => {
@@ -83,10 +94,13 @@ const Menu = () => {
     const clearCart = () => setCart([]);
 
     const getFoodTotal = () => {
-        return cart.reduce((acc, item) => acc + (item.price * item.qty * members), 0);
+        if (cart.length === 0) return 0;
+        const SERVICE_CHARGE = 40;
+        const itemsTotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+        return (itemsTotal + SERVICE_CHARGE) * members;
     };
 
-    const grandTotal = getFoodTotal() + getHallRent(members);
+    const grandTotal = getFoodTotal() + getHallRent(members) + EB_CHARGES;
 
     const saveHistory = () => {
         const newEntry = {
@@ -106,25 +120,30 @@ const Menu = () => {
         localStorage.setItem("orders", JSON.stringify(updatedHistory));
     };
 
-    const printBill = () => window.print();
+    const printBill = () => {
+        setTimeout(() => {
+            window.print();
+        }, 100);
+    };
 
     return (
         <div className="menu-bg menu-ui text-white pb-24 min-h-screen" style={{ backgroundImage: "url('/frontend/images/high-angle-view-various-vegetables-black-background_23-2147917348.avif')" }}>
+            <div className="hide-on-print">
             {/* NAV */}
             <nav className="glass menu-nav p-4 flex justify-between items-center sticky top-0 z-50">
                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-                    <img 
-                        src="/frontend/images/IMG_5225.PNG" 
-                        alt="logo" 
+                    <img
+                        src="/frontend/images/IMG_5225.PNG"
+                        alt="logo"
                         className="w-12 h-12 rounded-full object-cover border border-orange-500/50 hover:scale-110 transition-transform"
                     />
                     <h1 className="text-xl font-extrabold tracking-tight text-white hidden sm:block">Sindhu Mahal</h1>
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <Button 
-                        onClick={() => navigate('/')} 
-                        variant="glass" 
+                    <Button
+                        onClick={() => navigate('/')}
+                        variant="glass"
                         icon="🏠"
                         className="p-2 sm:px-4"
                     >
@@ -132,9 +151,9 @@ const Menu = () => {
                     </Button>
 
                     {role === 'admin' && (
-                        <Button 
-                            onClick={() => navigate('/admin')} 
-                            variant="glass" 
+                        <Button
+                            onClick={() => navigate('/admin')}
+                            variant="glass"
                             icon="⚙️"
                             className="p-2 sm:px-4"
                         >
@@ -142,9 +161,9 @@ const Menu = () => {
                         </Button>
                     )}
 
-                    <Button 
-                        onClick={() => setIsHistoryOpen(true)} 
-                        variant="primary" 
+                    <Button
+                        onClick={() => setIsHistoryOpen(true)}
+                        variant="primary"
                         icon="📜"
                         className="p-2 sm:px-6"
                     >
@@ -179,7 +198,7 @@ const Menu = () => {
                         className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:border-orange-500/50 outline-none transition-all shadow-xl placeholder:text-gray-500"
                     />
                     {searchTerm && (
-                        <button 
+                        <button
                             onClick={() => setSearchTerm('')}
                             className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
                         >
@@ -191,13 +210,13 @@ const Menu = () => {
 
             {/* MENU */}
             <div className="max-w-6xl mx-auto p-6 min-h-[400px]">
-                <div 
-                    key={activeSection} 
+                <div
+                    key={activeSection}
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-500"
                 >
                     {data[activeSection].filter(item => item[0].toLowerCase().includes(searchTerm.toLowerCase())).map((item, idx) => (
-                        <div 
-                            key={item[0]} 
+                        <div
+                            key={item[0]}
                             className="menu-item-card p-5 flex justify-between items-center rounded-2xl group relative"
                             style={{ animationDelay: `${idx * 0.05}s` }}
                         >
@@ -211,15 +230,15 @@ const Menu = () => {
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="flex gap-1">
-                                    <Button 
-                                        onClick={() => removeFromCart(item[0])} 
+                                    <Button
+                                        onClick={() => removeFromCart(item[0])}
                                         variant="danger"
                                         className="w-10 h-10 p-0 text-xl"
                                     >
                                         -
                                     </Button>
-                                    <Button 
-                                        onClick={() => addToCart(item[0], item[1])} 
+                                    <Button
+                                        onClick={() => addToCart(item[0], item[1])}
                                         variant="primary"
                                         className="w-10 h-10 p-0 text-xl"
                                     >
@@ -248,7 +267,7 @@ const Menu = () => {
                         type="number"
                         value={members}
                         min="1"
-                        onChange={(e) => setMembers(parseInt(e.target.value))}
+                        onChange={(e) => setMembers(parseInt(e.target.value) || 1)}
                         className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-2xl font-bold text-white focus:border-orange-500 transition-all menu-input"
                     />
                 </div>
@@ -269,15 +288,15 @@ const Menu = () => {
                         <span className="text-xl">🛒</span>
                         <h3 className="font-bold text-lg tracking-wide uppercase">Your Selection</h3>
                     </div>
-                    
+
                     <ul id="cartItems" className="space-y-3">
                         {cart.length === 0 ? (
                             <p className="text-gray-500 italic text-center py-4">No items selected yet</p>
                         ) : (
                             cart.map(item => (
-                                <li key={item.name} className="flex justify-between items-center text-gray-200">
-                                    <span className="flex-1">{item.name} <span className="text-orange-400 font-bold">x {item.qty}</span></span>
-                                    <span className="font-semibold text-white">₹{(item.price * item.qty * members).toLocaleString()}</span>
+                                <li key={item.name} className="flex justify-between items-center text-gray-200 bg-white/5 p-3 rounded-xl border border-white/5">
+                                    <span className="flex-1 font-medium">{item.name}</span>
+                                    <span className="bg-orange-500/20 text-orange-400 px-3 py-1 rounded-lg font-bold text-sm">x {item.qty}</span>
                                 </li>
                             ))
                         )}
@@ -289,18 +308,13 @@ const Menu = () => {
                             <Button onClick={() => setIsBillOpen(true)} variant="primary" fullWidth icon="📄">Generate Bill</Button>
                         </div>
                     )}
-
-                    <div className="mt-8 flex justify-between items-end">
-                        <span className="text-gray-400 text-sm uppercase tracking-tighter">Grand Total</span>
-                        <h2 className="text-4xl font-black text-white">₹{grandTotal.toLocaleString()}</h2>
-                    </div>
                 </div>
             </div>
 
             {/* MOBILE BOTTOM BAR */}
             <div className="fixed bottom-0 left-0 w-full glass p-5 flex justify-between items-center md:hidden z-20 border-t border-white/10">
                 <div className="flex flex-col">
-                    <span className="text-[10px] uppercase text-orange-400 font-bold">Total Amount</span>
+                    <span className="text-[10px] uppercase text-orange-400 font-bold">Total (₹{Math.ceil(grandTotal / members).toLocaleString()}/head)</span>
                     <span className="font-black text-2xl">₹{grandTotal.toLocaleString()}</span>
                 </div>
                 <div className="flex gap-2">
@@ -308,28 +322,80 @@ const Menu = () => {
                     <Button onClick={() => setIsBillOpen(true)} variant="primary" className="px-6 py-3 font-bold uppercase text-xs">Bill</Button>
                 </div>
             </div>
+            </div>
 
             {/* BILL MODAL */}
             {isBillOpen && (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-                    <div className="glass menu-modal p-5 rounded-2xl w-[90%] max-w-md text-white">
-                        <h2 className="text-center font-bold text-xl mb-4">Invoice</h2>
-                        <div id="printArea">
-                            <div id="billContent">
-                                {cart.map(item => (
-                                    <div key={item.name} className="flex justify-between py-1">
-                                        <span>{item.name} x {item.qty}</span>
-                                    </div>
-                                ))}
-                                <hr className="my-2 border-white/20" />
-                                <div className="flex justify-between"><span>Food Total</span><span>₹{getFoodTotal()}</span></div>
-                                <div className="flex justify-between"><span>Hall Rent</span><span>₹{getHallRent(members)}</span></div>
-                                <hr className="my-2 border-white/20" />
-                                <div className="flex justify-between font-bold text-lg"><span>Total</span><span>₹{grandTotal}</span></div>
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 print-modal-wrapper">
+                    <div className="glass menu-modal p-5 rounded-3xl w-[95%] max-w-lg text-white max-h-[95vh] overflow-y-auto shadow-2xl print-modal-content">
+                        <h2 className="text-center font-bold text-xl mb-4 border-b border-white/10 pb-2 hide-on-print">Invoice</h2>
+                        <div id="printArea" className="text-black bg-white p-6 border-2 border-gray-100 rounded-3xl shadow-sm max-w-full mx-auto my-2">
+                            {/* Receipt Header */}
+                            <div className="text-center mb-4 pb-4 border-b-2 border-dashed border-gray-200">
+                                <img
+                                    src="/frontend/images/IMG_5225.PNG"
+                                    alt="logo"
+                                    className="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2 border-orange-500"
+                                />
+                                <h2 className="text-xl font-black uppercase tracking-widest text-black">Sindhu Mahal</h2>
+                                <p className="text-[9px] text-black font-bold tracking-tighter uppercase mt-0.5">Invoice • {new Date().toLocaleDateString()}</p>
+                            </div>
+
+                            {/* Itemized Table */}
+                            <div className="space-y-2 mb-4">
+                                <div className="flex justify-between text-[10px] font-black text-black uppercase tracking-widest px-2">
+                                    <span>Item Detail</span>
+                                    <span>Qty</span>
+                                </div>
+                                <div className="space-y-1">
+                                    {cart.map(item => (
+                                        <div key={item.name} className="flex justify-between items-center py-1.5 px-3 bg-gray-50 rounded-lg border border-gray-100">
+                                            <span className="font-bold text-black text-sm">{item.name}</span>
+                                            <span className="bg-gray-200 text-black px-2 py-0.5 rounded text-[10px] font-black uppercase">x {item.qty}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Financial Summary */}
+                            <div className="space-y-2 bg-gray-50 p-4 rounded-2xl mb-4 border border-gray-100">
+                                <div className="flex justify-between text-xs text-black font-medium">
+                                    <span>Food Total</span>
+                                    <span className="font-bold text-black">₹{getFoodTotal().toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between text-xs text-black font-medium">
+                                    <span>Hall Rent</span>
+                                    <span className="font-bold text-black">₹{getHallRent(members).toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between text-xs text-black font-medium">
+                                    <span>Electricity (EB) & Misc</span>
+                                    <span className="font-bold text-black">₹{EB_CHARGES.toLocaleString()}</span>
+                                </div>
+                                <div className="pt-2 border-t border-gray-200 flex justify-between items-baseline">
+                                    <span className="text-[10px] font-black uppercase text-black">Grand Total</span>
+                                    <span className="text-xl font-black text-black">₹{grandTotal.toLocaleString()}</span>
+                                </div>
+                            </div>
+
+                            {/* Per Head Cards */}
+                            <div className="grid grid-cols-2 gap-2 mb-4">
+                                <div className="bg-gray-100 p-2 rounded-xl text-center border border-gray-200">
+                                    <p className="text-[7px] uppercase font-black text-black mb-0.5">Food / Head</p>
+                                    <p className="font-black text-black text-sm">₹{Math.ceil(getFoodTotal() / members).toLocaleString()}</p>
+                                </div>
+                                <div className="bg-orange-100 p-2 rounded-xl text-center border border-orange-200">
+                                    <p className="text-[7px] uppercase font-black text-black mb-0.5">Total / Head</p>
+                                    <p className="font-black text-black text-sm">₹{Math.ceil(grandTotal / members).toLocaleString()}</p>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="text-center">
+                                <p className="text-xs font-black text-black italic uppercase tracking-wider">Thank You!</p>
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-3 mt-6">
+                        <div className="flex flex-col gap-3 mt-6 hide-on-print">
                             <div className="grid grid-cols-2 gap-3">
                                 <Button onClick={saveHistory} variant="info" icon="💾">Save</Button>
                                 <Button onClick={printBill} variant="success" icon="🖨️">Print</Button>
@@ -342,7 +408,7 @@ const Menu = () => {
 
             {/* HISTORY MODAL */}
             {isHistoryOpen && (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hide-on-print">
                     <div className="glass menu-modal p-5 rounded-2xl w-[90%] max-w-md text-white max-h-[80vh] overflow-auto">
                         <h2 className="text-center font-bold text-xl mb-4">History</h2>
                         {history.length === 0 ? (

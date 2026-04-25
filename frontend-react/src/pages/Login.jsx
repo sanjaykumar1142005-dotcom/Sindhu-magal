@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../components/Button';
+import API_URL from '../config';
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -8,8 +9,7 @@ const Login = () => {
     const [msg, setMsg] = useState("");
     const navigate = useNavigate();
 
-    // 🔥 change localhost → 127.0.0.1 (important fix)
-    const API = "http://127.0.0.1:5000";
+    const API = API_URL;
 
     const handleLogin = async () => {
         if (!email || !password) {
