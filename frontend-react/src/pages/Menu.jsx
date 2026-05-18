@@ -5,7 +5,17 @@ import API_URL from '../config';
 
 const Menu = () => {
     const [data, setData] = useState({
-        breakfast: [],
+        breakfast: [
+            ['(300 ML) தண்ணீர் பாட்டில்', 10],
+            ['அன்னாசி கேசரி', 40],
+            ['ஆப்பம் + தேங்காய் பால்', 50],
+            ['இட்லி', 40],
+            ['காபி(Coffee)', 15],
+            ['காளான் பிரியாணி (Mushroom Biryani, Onion Raita)', 120],
+            ['டீ (Tea)', 15],
+            ['நெய் பொங்கல்', 60],
+            ['பூரி', 40]
+        ],
         lunch: [],
         dinner: []
     });
@@ -36,7 +46,7 @@ const Menu = () => {
             try {
                 const response = await fetch(`${API_URL}/menu`);
                 const result = await response.json();
-                if (result.success) {
+                if (result.success && result.data && result.data.length > 0) {
                     const SERVICE_CHARGE = 40;
                     const grouped = {
                         breakfast: result.data.filter(i => i.category === 'breakfast').map(i => [i.name, i.price]),
@@ -256,58 +266,43 @@ const Menu = () => {
                 </div>
             </div>
 
-            {/* MEMBERS & RENT */}
-            <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6 px-6">
-                <div className="menu-stat-card p-6 text-center rounded-2xl">
-                    <div className="flex items-center justify-center gap-2 mb-3 text-orange-400">
-                        <span className="text-xl">👥</span>
-                        <p className="font-semibold uppercase tracking-wider text-sm">Guest Count</p>
-                    </div>
-                    <input
-                        type="number"
-                        value={members}
-                        min="1"
-                        onChange={(e) => setMembers(parseInt(e.target.value) || 1)}
-                        className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-2xl font-bold text-white focus:border-orange-500 transition-all menu-input"
-                    />
-                </div>
-
-                <div className="menu-stat-card p-6 text-center rounded-2xl flex flex-col justify-center">
-                    <div className="flex items-center justify-center gap-2 mb-1 text-orange-400">
-                        <span className="text-xl">🏛️</span>
-                        <p className="font-semibold uppercase tracking-wider text-sm">Hall Rental</p>
-                    </div>
-                    <p className="text-4xl font-black text-white px-4 py-2">₹{getHallRent(members).toLocaleString()}</p>
-                </div>
-            </div>
-
-            {/* CART & TOTAL */}
+            {/* MEMBERS SECTION */}
             <div className="max-w-6xl mx-auto p-6 pb-32">
                 <div className="menu-cart-card p-6 rounded-2xl">
-                    <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
-                        <span className="text-xl">🛒</span>
-                        <h3 className="font-bold text-lg tracking-wide uppercase">Your Selection</h3>
+                    <div className="flex items-center gap-2 mb-6 border-b border-white/10 pb-3">
+                        <span className="text-xl">👥</span>
+                        <h3 className="font-bold text-lg tracking-wide uppercase">Members & Hall Rent</h3>
                     </div>
 
-                    <ul id="cartItems" className="space-y-3">
-                        {cart.length === 0 ? (
-                            <p className="text-gray-500 italic text-center py-4">No items selected yet</p>
-                        ) : (
-                            cart.map(item => (
-                                <li key={item.name} className="flex justify-between items-center text-gray-200 bg-white/5 p-3 rounded-xl border border-white/5">
-                                    <span className="flex-1 font-medium">{item.name}</span>
-                                    <span className="bg-orange-500/20 text-orange-400 px-3 py-1 rounded-lg font-bold text-sm">x {item.qty}</span>
-                                </li>
-                            ))
-                        )}
-                    </ul>
-
-                    {cart.length > 0 && (
-                        <div className="flex gap-3 mt-6 pt-6 border-t border-white/10">
-                            <Button onClick={clearCart} variant="danger" fullWidth icon="🗑️">Reset</Button>
-                            <Button onClick={() => setIsBillOpen(true)} variant="primary" fullWidth icon="📄">Generate Bill</Button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div className="text-center">
+                            <p className="font-semibold uppercase tracking-wider text-xs text-orange-400 mb-2">Guest Count</p>
+                            <input
+                                type="number"
+                                value={members}
+                                min="0"
+                                onChange={(e) => setMembers(parseInt(e.target.value) || 0)}
+                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-2xl font-bold text-white focus:border-orange-500 transition-all menu-input"
+                            />
                         </div>
-                    )}
+                        <div className="text-center flex flex-col justify-center">
+                            <p className="font-semibold uppercase tracking-wider text-xs text-orange-400 mb-2">Hall Rental</p>
+                            <p className="text-3xl font-black text-white">₹{getHallRent(members).toLocaleString()}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-6 border-t border-white/10">
+                        <Button onClick={clearCart} variant="danger" fullWidth icon="🗑️">Reset</Button>
+                        <Button 
+                            onClick={() => setIsBillOpen(true)} 
+                            variant="primary" 
+                            fullWidth 
+                            icon="📄"
+                            disabled={cart.length === 0}
+                        >
+                            Generate Bill
+                        </Button>
+                    </div>
                 </div>
             </div>
 
@@ -328,7 +323,7 @@ const Menu = () => {
             {isBillOpen && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 print-modal-wrapper">
                     <div className="glass menu-modal p-5 rounded-3xl w-[95%] max-w-lg text-white max-h-[95vh] overflow-y-auto shadow-2xl print-modal-content">
-                        <h2 className="text-center font-bold text-xl mb-4 border-b border-white/10 pb-2 hide-on-print">Invoice</h2>
+                        <h2 className="text-center font-bold text-xl mb-4 border-b border-white/10 pb-2 hide-on-print">Quotation</h2>
                         <div id="printArea" className="text-black bg-white p-6 border-2 border-gray-100 rounded-3xl shadow-sm max-w-full mx-auto my-2">
                             {/* Receipt Header */}
                             <div className="text-center mb-4 pb-4 border-b-2 border-dashed border-gray-200">
@@ -338,7 +333,7 @@ const Menu = () => {
                                     className="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2 border-orange-500"
                                 />
                                 <h2 className="text-xl font-black uppercase tracking-widest text-black">Sindhu Mahal</h2>
-                                <p className="text-[9px] text-black font-bold tracking-tighter uppercase mt-0.5">Invoice • {new Date().toLocaleDateString()}</p>
+                                <p className="text-[9px] text-black font-bold tracking-tighter uppercase mt-0.5">Quotation • {new Date().toLocaleDateString()}</p>
                             </div>
 
                             {/* Itemized Table */}
@@ -360,6 +355,10 @@ const Menu = () => {
                             {/* Financial Summary */}
                             <div className="space-y-2 bg-gray-50 p-4 rounded-2xl mb-4 border border-gray-100">
                                 <div className="flex justify-between text-xs text-black font-medium">
+                                    <span>Guest Count</span>
+                                    <span className="font-bold text-black">{members}</span>
+                                </div>
+                                <div className="flex justify-between text-xs text-black font-medium">
                                     <span>Food Total</span>
                                     <span className="font-bold text-black">₹{getFoodTotal().toLocaleString()}</span>
                                 </div>
@@ -377,17 +376,7 @@ const Menu = () => {
                                 </div>
                             </div>
 
-                            {/* Per Head Cards */}
-                            <div className="grid grid-cols-2 gap-2 mb-4">
-                                <div className="bg-gray-100 p-2 rounded-xl text-center border border-gray-200">
-                                    <p className="text-[7px] uppercase font-black text-black mb-0.5">Food / Head</p>
-                                    <p className="font-black text-black text-sm">₹{Math.ceil(getFoodTotal() / members).toLocaleString()}</p>
-                                </div>
-                                <div className="bg-orange-100 p-2 rounded-xl text-center border border-orange-200">
-                                    <p className="text-[7px] uppercase font-black text-black mb-0.5">Total / Head</p>
-                                    <p className="font-black text-black text-sm">₹{Math.ceil(grandTotal / members).toLocaleString()}</p>
-                                </div>
-                            </div>
+
 
                             {/* Footer */}
                             <div className="text-center">

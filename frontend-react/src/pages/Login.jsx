@@ -58,45 +58,55 @@ const Login = () => {
 
     return (
         <div
-            className="min-h-screen flex items-center justify-center bg-gray-900"
+            className="min-h-screen flex items-center justify-center p-4"
             style={{
-                background: "url('https://images.unsplash.com/photo-1498654896293-37aacf113fd9') no-repeat center/cover fixed"
+                background: "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1498654896293-37aacf113fd9?auto=format&fit=crop&w=2000&q=80') no-repeat center/cover fixed"
             }}
         >
-            <div className="p-6 rounded-2xl w-full max-w-md bg-white/10 backdrop-blur-md shadow-lg">
-                <h2 className="text-center text-xl font-bold mb-4 text-white">Login</h2>
+            <div className="p-8 sm:p-10 rounded-[1rem] w-full max-w-[400px] bg-white/5 backdrop-blur-md border border-white/20 shadow-2xl">
+                <h2 className="text-center text-3xl font-bold mb-8 text-white tracking-wide">Login Form</h2>
 
-                <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
-                    className="w-full mb-3 p-3 rounded text-black outline-none"
-                />
+                <div className="space-y-6 mb-6">
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Enter your email"
+                        className="w-full pb-2 bg-transparent text-white border-b border-white/50 focus:border-white outline-none transition-all placeholder-white/70"
+                    />
 
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="w-full mb-3 p-3 rounded text-black outline-none"
-                />
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter your password"
+                        className="w-full pb-2 bg-transparent text-white border-b border-white/50 focus:border-white outline-none transition-all placeholder-white/70"
+                    />
+                </div>
 
-                <Button
+                <div className="flex justify-between items-center mb-8 text-sm text-white/90">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" className="w-4 h-4 rounded border-gray-300" />
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" className="hover:text-white transition-colors">Forgot password?</a>
+                </div>
+
+                <button
                     onClick={handleLogin}
-                    variant="success"
-                    fullWidth
-                    loading={msg === "Logging in..."}
-                    className="mb-4"
+                    disabled={msg === "Logging in..."}
+                    className="w-full bg-white text-black font-semibold py-3 rounded-md hover:bg-gray-100 transition-colors mb-6"
                 >
-                    Login
-                </Button>
+                    {msg === "Logging in..." ? "Logging in..." : "Log In"}
+                </button>
 
-                <p className="text-center text-white text-sm">
-                    Don't have an account? <Link to="/signup" className="text-green-400 font-bold hover:underline">Create one</Link>
+                <p className="text-center text-white/90 text-sm">
+                    Don't have an account? <Link to="/signup" className="text-white hover:underline">Register</Link>
                 </p>
 
-                <p className="text-center mt-3 text-orange-400 font-medium">{msg}</p>
+                {msg && msg !== "Logging in..." && (
+                    <p className="text-center mt-4 text-orange-400 font-medium">{msg}</p>
+                )}
             </div>
         </div>
     );
