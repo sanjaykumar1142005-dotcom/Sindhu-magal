@@ -580,3 +580,17 @@ body {
         print-color-adjust: exact !important;
     }
 }
+
+/* MacBook Pro specific retina display adjustments */
+@media only screen and (-webkit-min-device-pixel-ratio: 2) and (min-width: 1200px),
+       only screen and (min-resolution: 192dpi) and (min-width: 1200px) {
+    .home-center-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .macbook-panel-container {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
+}

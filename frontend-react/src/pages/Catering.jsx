@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 import API_URL from '../config';
 
-const Menu = () => {
+const Catering = () => {
     const [data, setData] = useState({
         breakfast: [
             ['(300 ML) தண்ணீர் பாட்டில்', 10],
@@ -48,7 +48,6 @@ const Menu = () => {
                 const response = await fetch(`${API_URL}/menu`);
                 const result = await response.json();
                 if (result.success && result.data && result.data.length > 0) {
-                    const SERVICE_CHARGE = 40;
                     const grouped = {
                         breakfast: result.data.filter(i => i.category === 'breakfast').map(i => [i.name, i.price]),
                         lunch: result.data.filter(i => i.category === 'lunch').map(i => [i.name, i.price]),
@@ -142,7 +141,7 @@ const Menu = () => {
     };
 
     return (
-        <div className="menu-bg menu-ui text-white pb-24 min-h-screen" style={{ backgroundImage: "url('/frontend/images/high-angle-view-various-vegetables-black-background_23-2147917348.avif')" }}>
+        <div className="menu-bg menu-ui text-white pb-24 min-h-screen" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1498654896293-37aacf113fd9')" }}>
             <div className="hide-on-print">
             {/* NAV */}
             <nav className="glass menu-nav p-4 flex justify-between items-center sticky top-0 z-50">
@@ -151,6 +150,7 @@ const Menu = () => {
                         src="/frontend/images/IMG_5225.PNG"
                         alt="logo"
                         className="w-12 h-12 rounded-full object-cover border border-orange-500/50 hover:scale-110 transition-transform"
+                        onError={(e) => {e.target.style.display='none'}}
                     />
                     <h1 className="text-xl font-extrabold tracking-tight text-white hidden sm:block">Sindhu Mahal</h1>
                 </div>
@@ -172,7 +172,7 @@ const Menu = () => {
                             icon="⚙️"
                             className="p-2 sm:px-4"
                         >
-                            <span className="hidden sm:inline">Admin</span>
+                            <span className="hidden sm:inline">Admin Dashboard</span>
                         </Button>
                     )}
 
@@ -207,7 +207,7 @@ const Menu = () => {
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-400 text-xl transition-transform group-focus-within:scale-110">🔍</span>
                     <input
                         type="text"
-                        placeholder="Search for dishes..."
+                        placeholder="Search for catering dishes..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:border-orange-500/50 outline-none transition-all shadow-xl placeholder:text-gray-500"
@@ -223,7 +223,7 @@ const Menu = () => {
                 </div>
             </div>
 
-            {/* MENU */}
+            {/* MENU GRID */}
             <div className="max-w-6xl mx-auto p-6 min-h-[400px]">
                 <div
                     key={activeSection}
@@ -336,9 +336,10 @@ const Menu = () => {
                                     src="/frontend/images/IMG_5225.PNG"
                                     alt="logo"
                                     className="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2 border-orange-500"
+                                    onError={(e) => {e.target.style.display='none'}}
                                 />
                                 <h2 className="text-xl font-black uppercase tracking-widest text-black">Sindhu Mahal</h2>
-                                <p className="text-[9px] text-black font-bold tracking-tighter uppercase mt-0.5">Quotation • {new Date().toLocaleDateString()}</p>
+                                <p className="text-[9px] text-black font-bold tracking-tighter uppercase mt-0.5">Catering Quotation • {new Date().toLocaleDateString()}</p>
                             </div>
 
                             {/* Itemized Table */}
@@ -381,8 +382,6 @@ const Menu = () => {
                                 </div>
                             </div>
 
-
-
                             {/* Footer */}
                             <div className="text-center">
                                 <p className="text-xs font-black text-black italic uppercase tracking-wider">Thank You!</p>
@@ -404,7 +403,7 @@ const Menu = () => {
             {isHistoryOpen && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hide-on-print">
                     <div className="glass menu-modal p-5 rounded-2xl w-[90%] max-w-md text-white max-h-[80vh] overflow-auto">
-                        <h2 className="text-center font-bold text-xl mb-4">History</h2>
+                        <h2 className="text-center font-bold text-xl mb-4">Catering History</h2>
                         {history.length === 0 ? (
                             <p className="text-center text-gray-400">No history found</p>
                         ) : (
@@ -516,4 +515,4 @@ const Menu = () => {
     );
 };
 
-export default Menu;
+export default Catering;

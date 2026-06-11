@@ -2,22 +2,28 @@ require('dotenv').config();
 const { Pool } = require("pg");
 
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT
+  user: process.env.DB_USER || "postgres",
+  host: process.env.DB_HOST || "localhost",
+  database: process.env.DB_NAME || "postgres",
+  password: process.env.DB_PASSWORD !== undefined ? String(process.env.DB_PASSWORD) : "postgres",
+  port: process.env.DB_PORT || 5432
 });
 
 async function setup() {
   try {
     console.log("Setting up database...");
 
-    // 1. Add role column to users if it doesn't exist
+    // 1. Create users table if it doesn't exist, and add role column
     await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(20) DEFAULT 'user'
+      );
       ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'user';
     `);
-    console.log("✅ Role column added to users table.");
+    console.log("✅ Users table and role column verified.");
 
     // 2. Create menu_items table
     await pool.query(`

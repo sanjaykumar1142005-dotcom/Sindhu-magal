@@ -13,6 +13,8 @@ const AdminMenu = () => {
 
     const API = API_URL;
 
+    console.log("API URL:", API);
+
     useEffect(() => {
         const role = localStorage.getItem("role");
         const token = localStorage.getItem("token");
@@ -49,7 +51,11 @@ const AdminMenu = () => {
                     'Content-Type': 'application/json',
                     'Authorization': localStorage.getItem('token')
                 },
-                body: JSON.stringify(newItem)
+                body: JSON.stringify({
+                    name: newItem.name,
+                    price: parseInt(newItem.price) || 0,
+                    category: newItem.category
+                })
             });
             const data = await res.json();
             if (data.success) {
@@ -121,7 +127,9 @@ const AdminMenu = () => {
                         />
                         <h1 className="text-3xl font-bold text-orange-500">Sindhu Mahal Admin</h1>
                     </div>
-                    <Button onClick={() => navigate('/')} variant="glass" icon="🏠">Home</Button>
+                    <div className="flex gap-2 flex-wrap">
+                        <Button onClick={() => navigate('/')} variant="glass" icon="🏠">Home</Button>
+                    </div>
                 </div>
 
                 {msg && <p className="bg-green-600/20 text-green-400 p-3 rounded mb-4 text-center">{msg}</p>}

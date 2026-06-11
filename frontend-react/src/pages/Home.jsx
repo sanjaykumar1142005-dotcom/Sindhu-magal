@@ -34,13 +34,15 @@ const Home = () => {
             alert("Please login first");
             navigate("/login");
         } else {
-            navigate("/menu");
+            navigate("/catering");
         }
     };
 
+
+
     return (
-        <div className="home-bg home-ui min-h-screen text-white">
-            <div className="home-shell w-full px-3 md:px-6 py-4 md:py-8">
+        <div className="home-bg home-ui min-h-screen text-white home-center-container">
+            <div className="home-shell w-full px-3 md:px-6 py-4 md:py-8 macbook-panel-container">
                 <div className="home-panel fade-in-up">
                     <div className="home-main">
                         <nav className="home-topbar">
@@ -69,15 +71,16 @@ const Home = () => {
                                     Just confirm your order and enjoy delicious food delivered fast with
                                     premium quality service.
                                 </p>
-                                <Button
-                                    onClick={goMenu}
-                                    variant="primary"
-                                    size="lg"
-                                    icon="🍽"
-                                    className="mt-6"
-                                >
-                                    See Menu
-                                </Button>
+                                <div className="flex flex-wrap gap-4 mt-6">
+                                    <Button
+                                        onClick={goMenu}
+                                        variant="primary"
+                                        size="lg"
+                                        icon="🍽"
+                                    >
+                                        Catering Menu
+                                    </Button>
+                                </div>
                             </div>
 
                             <div className="hero-visual fade-in-up-delayed">

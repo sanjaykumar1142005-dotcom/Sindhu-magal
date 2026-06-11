@@ -10,6 +10,7 @@ const Login = () => {
     const navigate = useNavigate();
 
     const API = API_URL;
+    console.log("API URL:", API);
 
     const handleLogin = async () => {
         if (!email || !password) {
