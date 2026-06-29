@@ -68,8 +68,9 @@ const Catering = () => {
     }, []);
 
     const getHallRent = (m) => {
-        if (m <= 150) return 7500;
-        if (m <= 200) return 5000;
+        const count = typeof m === 'number' ? m : (parseInt(m) || 0);
+        if (count <= 150) return 7500;
+        if (count <= 200) return 5000;
         return 2500;
     };
 
@@ -107,17 +108,19 @@ const Catering = () => {
         if (cart.length === 0) return 0;
         const SERVICE_CHARGE = 40;
         const itemsTotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-        return (itemsTotal + SERVICE_CHARGE) * members;
+        const count = typeof members === 'number' ? members : (parseInt(members) || 0);
+        return (itemsTotal + SERVICE_CHARGE) * count;
     };
 
     const grandTotal = getFoodTotal() + getHallRent(members) + EB_CHARGES;
 
     const saveHistory = () => {
+        const count = typeof members === 'number' ? members : (parseInt(members) || 0);
         const newEntry = {
             date: new Date().toLocaleString(),
             items: [...cart],
-            members: members,
-            hallRent: getHallRent(members),
+            members: count,
+            hallRent: getHallRent(count),
             ebCharges: EB_CHARGES,
             foodTotal: getFoodTotal(),
             total: grandTotal
@@ -286,7 +289,10 @@ const Catering = () => {
                                 type="number"
                                 value={members}
                                 min="0"
-                                onChange={(e) => setMembers(parseInt(e.target.value) || 0)}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setMembers(val === '' ? '' : Math.max(0, parseInt(val) || 0));
+                                }}
                                 className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-2xl font-bold text-white focus:border-orange-500 transition-all menu-input"
                             />
                         </div>
@@ -314,7 +320,7 @@ const Catering = () => {
             {/* MOBILE BOTTOM BAR */}
             <div className="fixed bottom-0 left-0 w-full glass p-5 flex justify-between items-center md:hidden z-20 border-t border-white/10">
                 <div className="flex flex-col">
-                    <span className="text-[10px] uppercase text-orange-400 font-bold">Total (₹{Math.ceil(grandTotal / members).toLocaleString()}/head)</span>
+                    <span className="text-[10px] uppercase text-orange-400 font-bold">Total (₹{Math.ceil(grandTotal / ((typeof members === 'number' ? members : parseInt(members)) || 1)).toLocaleString()}/head)</span>
                     <span className="font-black text-2xl">₹{grandTotal.toLocaleString()}</span>
                 </div>
                 <div className="flex gap-2">
@@ -362,7 +368,7 @@ const Catering = () => {
                             <div className="space-y-2 bg-gray-50 p-4 rounded-2xl mb-4 border border-gray-100">
                                 <div className="flex justify-between text-xs text-black font-medium">
                                     <span>Guest Count</span>
-                                    <span className="font-bold text-black">{members}</span>
+                                    <span className="font-bold text-black">{members === '' ? 0 : members}</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-black font-medium">
                                     <span>Food Total</span>

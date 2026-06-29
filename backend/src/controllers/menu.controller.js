@@ -62,8 +62,159 @@ const deleteMenuItem = async (req, res, next) => {
   }
 };
 
+/**
+ * Update stock level of a kitchen menu item
+ */
+const updateStock = async (req, res, next) => {
+  try {
+    const { id, stock, required_quantity } = req.body;
+
+    if (id === undefined || stock === undefined) {
+      return errorResponse(res, "Missing required fields (id, stock)", null, 400);
+    }
+
+    const itemStock = parseInt(stock);
+
+    if (isNaN(itemStock) || itemStock < 0) {
+      return errorResponse(res, "Stock portion must be a non-negative number", null, 400);
+    }
+
+    const updatedItem = await menuService.updateMenuItemStock(id, itemStock, required_quantity);
+    if (!updatedItem) {
+      return errorResponse(res, "Catering/Kitchen item not found", null, 404);
+    }
+
+    return successResponse(res, "Stock updated successfully ✅", { data: updatedItem });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Fetch kitchen usage logs
+ */
+const getUsageLog = async (req, res, next) => {
+  try {
+    const logs = await menuService.getKitchenUsageLog();
+    return successResponse(res, "Usage log fetched successfully", { data: logs });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Record kitchen daily usage/wastage portions
+ */
+const createUsage = async (req, res, next) => {
+  try {
+    const { food_name, quantity, reason } = req.body;
+
+    if (!food_name || quantity === undefined || !reason) {
+      return errorResponse(res, "Missing required fields (food_name, quantity, reason)", null, 400);
+    }
+
+    const qty = parseInt(quantity);
+    if (isNaN(qty) || qty <= 0) {
+      return errorResponse(res, "Quantity must be a positive number", null, 400);
+    }
+
+    const newUsage = await menuService.createKitchenUsageEntry(food_name, qty, reason);
+    return successResponse(res, "Usage recorded successfully ✅", { data: newUsage });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Fetch kitchen purchase history logs
+ */
+const getPurchaseLog = async (req, res, next) => {
+  try {
+    const logs = await menuService.getKitchenPurchaseLog();
+    return successResponse(res, "Purchase log fetched successfully", { data: logs });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Add kitchen stock portions and log as purchase entry
+ */
+const logPurchaseAndAddStock = async (req, res, next) => {
+  try {
+    const { menu_item_id, portions_added, amount } = req.body;
+
+    if (menu_item_id === undefined || portions_added === undefined) {
+      return errorResponse(res, "Missing required fields (menu_item_id, portions_added)", null, 400);
+    }
+
+    const parts = parseInt(portions_added);
+    const cost = parseInt(amount) || 0;
+
+    if (isNaN(parts) || parts <= 0) {
+      return errorResponse(res, "Portions added must be a positive number", null, 400);
+    }
+
+    const result = await menuService.addKitchenStockAndLogPurchase(menu_item_id, parts, cost);
+    if (!result) {
+      return errorResponse(res, "Catering/Kitchen menu item not found", null, 404);
+    }
+
+    return successResponse(res, "Stock portion added and logged successfully ✅", { data: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Update kitchen purchase log entry
+ */
+const updatePurchaseLog = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { food_name, portions_added, amount } = req.body;
+
+    if (!food_name || portions_added === undefined || amount === undefined) {
+      return errorResponse(res, "Missing required fields (food_name, portions_added, amount)", null, 400);
+    }
+
+    const updatedLog = await menuService.updateKitchenPurchaseLog(id, food_name, portions_added, amount);
+    if (!updatedLog) {
+      return errorResponse(res, "Purchase log not found", null, 404);
+    }
+
+    return successResponse(res, "Purchase log updated successfully ✅", { data: updatedLog });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Delete kitchen purchase log entry
+ */
+const deletePurchaseLog = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const deletedLog = await menuService.deleteKitchenPurchaseLog(id);
+    if (!deletedLog) {
+      return errorResponse(res, "Purchase log not found", null, 404);
+    }
+
+    return successResponse(res, "Purchase log deleted successfully 🗑️", { data: deletedLog });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getMenu,
   saveMenuItem,
-  deleteMenuItem
+  deleteMenuItem,
+  updateStock,
+  getUsageLog,
+  createUsage,
+  getPurchaseLog,
+  logPurchaseAndAddStock,
+  updatePurchaseLog,
+  deletePurchaseLog
 };

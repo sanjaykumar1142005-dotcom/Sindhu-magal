@@ -80,6 +80,14 @@ const Home = () => {
                                     >
                                         Catering Menu
                                     </Button>
+                                    <Button
+                                        onClick={() => navigate("/restaurant")}
+                                        variant="glass"
+                                        size="lg"
+                                        icon="🏪"
+                                    >
+                                        Restaurant
+                                    </Button>
                                 </div>
                             </div>
 

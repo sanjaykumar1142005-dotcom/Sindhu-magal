@@ -37,7 +37,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Dashboard Chooser Options */}
-            <div className="flex justify-center w-full max-w-xl px-4 animate-fadeIn">
+            <div className="flex justify-center w-full max-w-lg px-4 animate-fadeIn">
                 
                 {/* Option 1: Catering Management */}
                 <div className="glass p-8 rounded-3xl border border-white/10 hover:border-orange-500/30 bg-slate-950/40 backdrop-blur-xl shadow-2xl flex flex-col justify-between items-center text-center transition-all duration-300 hover:scale-[1.03] w-full">

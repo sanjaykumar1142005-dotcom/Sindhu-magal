@@ -88,7 +88,7 @@
     "negotiator": "^1.0.0",
     "node-addon-api": "^8.7.0",
     "node-gyp-build": "^4.8.4",
-    "nodemailer": "^8.0.5",
+    "nodemailer": "^9.0.1",
     "nodeman": "^1.1.2",
     "nodemon": "^3.1.14",
     "normalize-path": "^3.0.0",
