@@ -5,22 +5,17 @@ import API_URL from '../config';
 
 const Menu = () => {
     const [data, setData] = useState({
-        breakfast: [
-            ['(300 ML) தண்ணீர் பாட்டில்', 10],
-            ['அன்னாசி கேசரி', 40],
-            ['ஆப்பம் + தேங்காய் பால்', 50],
-            ['இட்லி', 40],
-            ['காபி(Coffee)', 15],
-            ['காளான் பிரியாணி (Mushroom Biryani, Onion Raita)', 120],
-            ['டீ (Tea)', 15],
-            ['நெய் பொங்கல்', 60],
-            ['பூரி', 40]
-        ],
+        breakfast: [],
         lunch: [],
         dinner: []
     });
 
-    const [activeSection, setActiveSection] = useState('breakfast');
+    const [activeSection, setActiveSection] = useState(() => localStorage.getItem('menu_active_tab') || 'breakfast');
+
+    const handleSectionSelect = (type) => {
+        setActiveSection(type);
+        localStorage.setItem('menu_active_tab', type);
+    };
     const [cart, setCart] = useState([]);
     const [members, setMembers] = useState(1);
     const [history, setHistory] = useState([]);
@@ -195,7 +190,7 @@ const Menu = () => {
                 {['breakfast', 'lunch', 'dinner'].map(type => (
                     <Button
                         key={type}
-                        onClick={() => setActiveSection(type)}
+                        onClick={() => handleSectionSelect(type)}
                         variant={activeSection === type ? 'primary' : 'glass'}
                         className={`font-bold tracking-wide transition-all ${activeSection === type ? 'scale-110 shadow-orange-500/50' : 'opacity-60 hover:opacity-100'}`}
                     >
@@ -232,44 +227,53 @@ const Menu = () => {
                     key={activeSection}
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-500"
                 >
-                    {data[activeSection].filter(item => item[0].toLowerCase().includes(searchTerm.toLowerCase())).map((item, idx) => (
-                        <div
-                            key={item[0]}
-                            className="menu-item-card p-5 flex justify-between items-center rounded-2xl group relative"
-                            style={{ animationDelay: `${idx * 0.05}s` }}
-                        >
-                            <div className="flex flex-col">
-                                <span className="text-lg font-medium tracking-wide">{item[0]}</span>
-                                {getItemQty(item[0]) > 0 && (
-                                    <span className="text-orange-400 text-sm font-bold animate-pulse">
-                                        Added: {getItemQty(item[0])}
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <div className="flex gap-1">
-                                    <Button
-                                        onClick={() => removeFromCart(item[0])}
-                                        variant="danger"
-                                        className="w-10 h-10 p-0 text-xl"
-                                    >
-                                        -
-                                    </Button>
-                                    <Button
-                                        onClick={() => addToCart(item[0], item[1])}
-                                        variant="primary"
-                                        className="w-10 h-10 p-0 text-xl"
-                                    >
-                                        +
-                                    </Button>
+                    {loading ? (
+                        <div className="col-span-full py-16 text-center">
+                            <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-orange-500 border-t-transparent mb-4"></div>
+                            <p className="text-gray-400 font-semibold tracking-wider text-sm uppercase">Loading Menu Items...</p>
+                        </div>
+                    ) : (
+                        <>
+                            {data[activeSection].filter(item => item[0].toLowerCase().includes(searchTerm.toLowerCase())).map((item, idx) => (
+                                <div
+                                    key={item[0]}
+                                    className="menu-item-card p-5 flex justify-between items-center rounded-2xl group relative"
+                                    style={{ animationDelay: `${idx * 0.05}s` }}
+                                >
+                                    <div className="flex flex-col">
+                                        <span className="text-lg font-medium tracking-wide">{item[0]}</span>
+                                        {getItemQty(item[0]) > 0 && (
+                                            <span className="text-orange-400 text-sm font-bold animate-pulse">
+                                                Added: {getItemQty(item[0])}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex gap-1">
+                                            <Button
+                                                onClick={() => removeFromCart(item[0])}
+                                                variant="danger"
+                                                className="w-10 h-10 p-0 text-xl"
+                                            >
+                                                -
+                                            </Button>
+                                            <Button
+                                                onClick={() => addToCart(item[0], item[1])}
+                                                variant="primary"
+                                                className="w-10 h-10 p-0 text-xl"
+                                            >
+                                                +
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    ))}
-                    {data[activeSection].filter(item => item[0].toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
-                        <div className="col-span-full py-12 text-center">
-                            <p className="text-gray-500 italic text-lg">No items found matching "{searchTerm}"</p>
-                        </div>
+                            ))}
+                            {data[activeSection].filter(item => item[0].toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                                <div className="col-span-full py-12 text-center">
+                                    <p className="text-gray-500 italic text-lg">No items found matching "{searchTerm}"</p>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

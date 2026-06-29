@@ -14,7 +14,12 @@ const KitchenPurchase = () => {
     const [isError, setIsError] = useState(false);
 
     // Active tab state: 'overview' | 'usage' | 'purchases'
-    const [activeTab, setActiveTab] = useState('overview');
+    const [activeTab, setActiveTab] = useState(() => localStorage.getItem('kitchen_active_tab') || 'overview');
+
+    const handleTabSelect = (tab) => {
+        setActiveTab(tab);
+        localStorage.setItem('kitchen_active_tab', tab);
+    };
 
 
     // Tab 2: Usage Form State
@@ -632,7 +637,7 @@ const KitchenPurchase = () => {
                 {/* Tab Chooser navigation */}
                 <div className="flex border-b border-white/10 gap-2">
                     <button
-                        onClick={() => setActiveTab('overview')}
+                        onClick={() => handleTabSelect('overview')}
                         className={`px-6 py-3 font-bold text-sm tracking-wider uppercase border-b-2 transition-all ${
                             activeTab === 'overview'
                                 ? 'border-orange-500 text-orange-500'
@@ -642,7 +647,7 @@ const KitchenPurchase = () => {
                         📋 Current Stock View
                     </button>
                     <button
-                        onClick={() => setActiveTab('usage')}
+                        onClick={() => handleTabSelect('usage')}
                         className={`px-6 py-3 font-bold text-sm tracking-wider uppercase border-b-2 transition-all ${
                             activeTab === 'usage'
                                 ? 'border-orange-500 text-orange-500'
@@ -652,7 +657,7 @@ const KitchenPurchase = () => {
                         🥣 Daily Usage Entry
                     </button>
                     <button
-                        onClick={() => setActiveTab('purchases')}
+                        onClick={() => handleTabSelect('purchases')}
                         className={`px-6 py-3 font-bold text-sm tracking-wider uppercase border-b-2 transition-all ${
                             activeTab === 'purchases'
                                 ? 'border-orange-500 text-orange-500'
