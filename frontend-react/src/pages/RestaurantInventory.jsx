@@ -178,10 +178,10 @@ const RestaurantInventory = () => {
 
                 <div className="flex gap-2">
                     <Button onClick={() => navigate("/restaurant")} variant="glass" icon="🏪">
-                        Restaurant
+                        <span className="hidden sm:inline">Restaurant</span>
                     </Button>
                     <Button onClick={() => navigate("/")} variant="glass" icon="🏠">
-                        Home
+                        <span className="hidden sm:inline">Home</span>
                     </Button>
                 </div>
             </nav>
@@ -307,7 +307,7 @@ const RestaurantInventory = () => {
                     </div>
 
                     {/* View mode toggle tabs */}
-                    <div className="flex gap-1.5 bg-black/40 p-1 rounded-xl border border-white/10 self-start lg:self-auto">
+                    <div className="hidden sm:flex gap-1.5 bg-black/40 p-1 rounded-xl border border-white/10 self-start lg:self-auto">
                         <button
                             onClick={() => setViewMode('table')}
                             className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
@@ -345,59 +345,120 @@ const RestaurantInventory = () => {
                     <div className="flex flex-col gap-6">
                         {/* 1. TABLE VIEW MODE */}
                         {viewMode === 'table' && (
-                            <div className="glass rounded-2xl border border-white/10 bg-slate-950/20 overflow-hidden">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr className="bg-white/5 text-xs text-orange-400 font-bold border-b border-white/10 uppercase tracking-wider">
-                                                <th onClick={() => handleSort('name')} className="p-4 cursor-pointer hover:text-orange-300 transition-colors">
-                                                    Item Name {sortField === 'name' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
-                                                </th>
-                                                <th onClick={() => handleSort('category')} className="p-4 cursor-pointer hover:text-orange-300 transition-colors">
-                                                    Category {sortField === 'category' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
-                                                </th>
-                                                <th onClick={() => handleSort('current_stock')} className="p-4 text-center cursor-pointer hover:text-orange-300 transition-colors">
-                                                    Current Stock {sortField === 'current_stock' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
-                                                </th>
-                                                <th onClick={() => handleSort('minimum_stock')} className="p-4 text-center cursor-pointer hover:text-orange-300 transition-colors">
-                                                    Min. Level {sortField === 'minimum_stock' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
-                                                </th>
-                                                <th className="p-4 text-center">Stock Status</th>
-                                                <th onClick={() => handleSort('updated_at')} className="p-4 text-right cursor-pointer hover:text-orange-300 transition-colors">
-                                                    Last Updated {sortField === 'updated_at' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="text-xs divide-y divide-white/5">
-                                            {paginatedItems.map((item) => {
-                                                const status = getStockStatus(item);
-                                                return (
-                                                    <tr key={item.id} className="hover:bg-white/5 transition-colors">
-                                                        <td className="p-4 font-bold text-white flex items-center gap-2">
-                                                            <span>🍲</span> {item.name}
-                                                        </td>
-                                                        <td className="p-4 text-gray-300">{item.category}</td>
-                                                        <td className="p-4 text-center font-bold text-white">
-                                                            {item.current_stock} <span className="text-[10px] text-gray-500 font-normal">{item.unit}</span>
-                                                        </td>
-                                                        <td className="p-4 text-center text-gray-400">
-                                                            {item.minimum_stock || 10} <span className="text-[10px] text-gray-500 font-normal">{item.unit}</span>
-                                                        </td>
-                                                        <td className="p-4 text-center">
-                                                            <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase border ${status.color}`}>
-                                                                {status.label}
-                                                            </span>
-                                                        </td>
-                                                        <td className="p-4 text-right text-gray-400 font-mono">
-                                                            {formatDateTime(item.updated_at)}
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
+                            <>
+                                {/* Desktop Table View */}
+                                <div className="hidden sm:block glass rounded-2xl border border-white/10 bg-slate-950/20 overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr className="bg-white/5 text-xs text-orange-400 font-bold border-b border-white/10 uppercase tracking-wider">
+                                                    <th onClick={() => handleSort('name')} className="p-4 cursor-pointer hover:text-orange-300 transition-colors">
+                                                        Item Name {sortField === 'name' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                                    </th>
+                                                    <th onClick={() => handleSort('category')} className="p-4 cursor-pointer hover:text-orange-300 transition-colors">
+                                                        Category {sortField === 'category' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                                    </th>
+                                                    <th onClick={() => handleSort('current_stock')} className="p-4 text-center cursor-pointer hover:text-orange-300 transition-colors">
+                                                        Current Stock {sortField === 'current_stock' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                                    </th>
+                                                    <th onClick={() => handleSort('minimum_stock')} className="p-4 text-center cursor-pointer hover:text-orange-300 transition-colors">
+                                                        Min. Level {sortField === 'minimum_stock' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                                    </th>
+                                                    <th className="p-4 text-center">Stock Status</th>
+                                                    <th onClick={() => handleSort('updated_at')} className="p-4 text-right cursor-pointer hover:text-orange-300 transition-colors">
+                                                        Last Updated {sortField === 'updated_at' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="text-xs divide-y divide-white/5">
+                                                {paginatedItems.map((item) => {
+                                                    const status = getStockStatus(item);
+                                                    return (
+                                                        <tr key={item.id} className="hover:bg-white/5 transition-colors">
+                                                            <td className="p-4 font-bold text-white flex items-center gap-2">
+                                                                <span>🍲</span> {item.name}
+                                                            </td>
+                                                            <td className="p-4 text-gray-300">{item.category}</td>
+                                                            <td className="p-4 text-center font-bold text-white">
+                                                                {item.current_stock} <span className="text-[10px] text-gray-500 font-normal">{item.unit}</span>
+                                                            </td>
+                                                            <td className="p-4 text-center text-gray-400">
+                                                                {item.minimum_stock || 10} <span className="text-[10px] text-gray-500 font-normal">{item.unit}</span>
+                                                            </td>
+                                                            <td className="p-4 text-center">
+                                                                <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase border ${status.color}`}>
+                                                                    {status.label}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-4 text-right text-gray-400 font-mono">
+                                                                {formatDateTime(item.updated_at)}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
+
+                                {/* Mobile Cards Fallback */}
+                                <div className="block sm:hidden flex flex-col gap-3">
+                                    {paginatedItems.map((item) => {
+                                        const status = getStockStatus(item);
+                                        const getCategoryIcon = (cat) => {
+                                            switch(cat) {
+                                                case 'Groceries': return '🌾';
+                                                case 'Dairy': return '🥛';
+                                                case 'Produce': return '🥦';
+                                                case 'Meat': return '🍗';
+                                                case 'Seafood': return '🐟';
+                                                case 'Spices': return '🌶️';
+                                                case 'Beverages': return '🥤';
+                                                case 'Bakery': return '🍞';
+                                                default: return '📦';
+                                            }
+                                        };
+                                        return (
+                                            <div 
+                                                key={item.id} 
+                                                className="glass p-4 rounded-2xl border border-white/10 bg-slate-950/20 flex flex-col gap-3"
+                                            >
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-gray-500 font-mono text-[10px]">#{item.id}</span>
+                                                        <h4 className="font-bold text-white text-sm">
+                                                            {getCategoryIcon(item.category)} {item.name}
+                                                        </h4>
+                                                    </div>
+                                                    <span className={`text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase border ${status.color}`}>
+                                                        {status.label}
+                                                    </span>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-3 bg-black/20 p-2.5 rounded-xl border border-white/5 text-center">
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="text-[9px] text-gray-400 uppercase font-semibold">Stock</span>
+                                                        <span className="text-xs font-black text-orange-400">
+                                                            {item.current_stock} <span className="text-[9px] text-gray-400 font-normal">{item.unit}</span>
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex flex-col gap-0.5 border-l border-white/5">
+                                                        <span className="text-[9px] text-gray-400 uppercase font-semibold">Min Level</span>
+                                                        <span className="text-xs font-black text-blue-400">
+                                                            {item.minimum_stock || 10} <span className="text-[9px] text-gray-400 font-normal">{item.unit}</span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex justify-between items-center text-[10px] text-gray-400 mt-1 px-1">
+                                                    <span>Last Updated:</span>
+                                                    <span className="font-mono">{formatDateTime(item.updated_at)}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </>
                         )}
 
                         {/* 2. CARD VIEW MODE */}

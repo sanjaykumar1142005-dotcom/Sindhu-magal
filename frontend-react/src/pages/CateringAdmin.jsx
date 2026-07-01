@@ -157,9 +157,9 @@ const CateringAdmin = () => {
                         </div>
                     </div>
                     <div className="flex gap-2">
-                        <Button onClick={() => navigate('/')} variant="glass" icon="🏠">Home</Button>
-                        <Button onClick={() => navigate('/admin')} variant="glass" icon="📊">Admin Panel</Button>
-                        <Button onClick={() => navigate('/catering')} variant="glass" icon="🍽">Catering Menu</Button>
+                        <Button onClick={() => navigate('/')} variant="glass" icon="🏠"><span className="hidden sm:inline">Home</span></Button>
+                        <Button onClick={() => navigate('/admin')} variant="glass" icon="📊"><span className="hidden sm:inline">Admin Panel</span></Button>
+                        <Button onClick={() => navigate('/catering')} variant="glass" icon="🍽"><span className="hidden sm:inline">Catering Menu</span></Button>
                     </div>
                 </div>
 
@@ -262,8 +262,12 @@ const CateringAdmin = () => {
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-2">
-                                                        <Button onClick={() => setEditingItem(item)} variant="info" size="sm" icon="✏️">Edit</Button>
-                                                        <Button onClick={() => handleDelete(item.id)} variant="danger" size="sm" icon="🗑️">Delete</Button>
+                                                        <Button onClick={() => setEditingItem(item)} variant="info" size="sm" icon="✏️">
+                                                            <span className="hidden sm:inline">Edit</span>
+                                                        </Button>
+                                                        <Button onClick={() => handleDelete(item.id)} variant="danger" size="sm" icon="🗑️">
+                                                            <span className="hidden sm:inline">Delete</span>
+                                                        </Button>
                                                     </div>
                                                 </>
                                             )}

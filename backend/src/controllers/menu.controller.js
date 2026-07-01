@@ -151,8 +151,8 @@ const logPurchaseAndAddStock = async (req, res, next) => {
     const parts = parseInt(portions_added);
     const cost = parseInt(amount) || 0;
 
-    if (isNaN(parts) || parts <= 0) {
-      return errorResponse(res, "Portions added must be a positive number", null, 400);
+    if (isNaN(parts) || parts < 0) {
+      return errorResponse(res, "Portions added must be a non-negative number", null, 400);
     }
 
     const result = await menuService.addKitchenStockAndLogPurchase(menu_item_id, parts, cost);

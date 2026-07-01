@@ -38,8 +38,6 @@ const Home = () => {
         }
     };
 
-
-
     return (
         <div className="home-bg home-ui min-h-screen text-white home-center-container">
             <div className="home-shell w-full px-3 md:px-6 py-4 md:py-8 macbook-panel-container">
@@ -82,7 +80,7 @@ const Home = () => {
                                     </Button>
                                     <Button
                                         onClick={() => navigate("/restaurant")}
-                                        variant="glass"
+                                        variant="primary"
                                         size="lg"
                                         icon="🏪"
                                     >

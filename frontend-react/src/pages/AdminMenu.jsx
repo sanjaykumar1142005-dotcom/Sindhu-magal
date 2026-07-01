@@ -128,7 +128,7 @@ const AdminMenu = () => {
                         <h1 className="text-3xl font-bold text-orange-500">Sindhu Mahal Admin</h1>
                     </div>
                     <div className="flex gap-2 flex-wrap">
-                        <Button onClick={() => navigate('/')} variant="glass" icon="🏠">Home</Button>
+                        <Button onClick={() => navigate('/')} variant="glass" icon="🏠"><span className="hidden sm:inline">Home</span></Button>
                     </div>
                 </div>
 
@@ -196,8 +196,12 @@ const AdminMenu = () => {
                                                     <span className="ml-4 text-orange-400">₹{item.price}</span>
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <Button onClick={() => setEditingItem(item)} variant="info" size="sm" icon="✏️">Edit</Button>
-                                                    <Button onClick={() => handleDelete(item.id)} variant="danger" size="sm" icon="🗑️">Delete</Button>
+                                                    <Button onClick={() => setEditingItem(item)} variant="info" size="sm" icon="✏️">
+                                                        <span className="hidden sm:inline">Edit</span>
+                                                    </Button>
+                                                    <Button onClick={() => handleDelete(item.id)} variant="danger" size="sm" icon="🗑️">
+                                                        <span className="hidden sm:inline">Delete</span>
+                                                    </Button>
                                                 </div>
                                             </>
                                         )}

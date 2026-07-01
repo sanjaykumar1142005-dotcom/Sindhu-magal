@@ -191,10 +191,10 @@ const RestaurantSales = () => {
 
                 <div className="flex gap-2">
                     <Button onClick={() => navigate("/restaurant")} variant="glass" icon="🏪">
-                        Restaurant
+                        <span className="hidden sm:inline">Restaurant</span>
                     </Button>
                     <Button onClick={() => navigate("/")} variant="glass" icon="🏠">
-                        Home
+                        <span className="hidden sm:inline">Home</span>
                     </Button>
                 </div>
             </nav>

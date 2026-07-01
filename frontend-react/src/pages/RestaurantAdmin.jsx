@@ -164,9 +164,9 @@ const RestaurantAdmin = () => {
                         </div>
                     </div>
                     <div className="flex gap-2">
-                        <Button onClick={() => navigate('/')} variant="glass" icon="🏠">Home</Button>
-                        <Button onClick={() => navigate('/restaurant')} variant="glass" icon="🏪">Restaurant</Button>
-                        <Button onClick={() => navigate('/restaurant/sales')} variant="glass" icon="📈">Sales Tracker</Button>
+                        <Button onClick={() => navigate('/')} variant="glass" icon="🏠"><span className="hidden sm:inline">Home</span></Button>
+                        <Button onClick={() => navigate('/restaurant')} variant="glass" icon="🏪"><span className="hidden sm:inline">Restaurant</span></Button>
+                        <Button onClick={() => navigate('/restaurant/sales')} variant="glass" icon="📈"><span className="hidden sm:inline">Sales Tracker</span></Button>
                     </div>
                 </div>
 
@@ -293,15 +293,15 @@ const RestaurantAdmin = () => {
                                                     <div className="flex gap-2">
                                                         <button 
                                                             onClick={() => setEditingItem(item)}
-                                                            className="px-3 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 text-xs font-bold transition-all"
+                                                            className="px-3 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 text-xs font-bold transition-all flex items-center gap-1"
                                                         >
-                                                            Edit ✏️
+                                                            <span className="hidden sm:inline">Edit</span> ✏️
                                                         </button>
                                                         <button 
                                                             onClick={() => handleDelete(item.id)}
-                                                            className="px-3 py-1 rounded bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 text-xs font-bold transition-all"
+                                                            className="px-3 py-1 rounded bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 text-xs font-bold transition-all flex items-center gap-1"
                                                         >
-                                                            Delete 🗑️
+                                                            <span className="hidden sm:inline">Delete</span> 🗑️
                                                         </button>
                                                     </div>
                                                 </div>

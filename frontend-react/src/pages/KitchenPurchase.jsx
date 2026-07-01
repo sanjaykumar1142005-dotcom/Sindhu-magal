@@ -61,6 +61,15 @@ const KitchenPurchase = () => {
                 const mappedItems = (data.data || []).map(item => {
                     const lowerName = (item.name || '').toLowerCase();
                     const isLeaf = lowerName.includes('leaf') || lowerName.includes('leafe');
+                    const isLiquid = lowerName.includes('milk') || lowerName.includes('oil') || lowerName.includes('water') || lowerName.includes('juice') || lowerName.includes('ghee') || lowerName.includes('vinegar') || lowerName.includes('sauce') || lowerName.includes('honey') || lowerName.includes('syrup') || lowerName.includes('liquid') || lowerName.includes('litter') || lowerName.includes('liter') || lowerName.includes('ltr');
+                    
+                    let resolvedUnit = item.unit || 'Kg';
+                    if (isLeaf) {
+                        resolvedUnit = 'Pcs';
+                    } else if (isLiquid && resolvedUnit === 'Kg') {
+                        resolvedUnit = 'Liter';
+                    }
+
                     return {
                         id: item.id,
                         name: item.name,
@@ -68,7 +77,7 @@ const KitchenPurchase = () => {
                         stock: parseFloat(item.current_stock) || 0,
                         required_quantity: parseFloat(item.required_quantity) || 0,
                         minimum_stock: parseFloat(item.minimum_stock) || 10,
-                        unit: isLeaf ? 'Pcs' : (item.unit || 'Kg'),
+                        unit: resolvedUnit,
                         price: 0
                     };
                 });
@@ -153,7 +162,14 @@ const KitchenPurchase = () => {
                         category: 'Others',
                         current_stock: 0,
                         required_quantity: 0,
-                        unit: 'Kg',
+                        unit: (function() {
+                            const lowerName = nameToUse.toLowerCase();
+                            const isLeaf = lowerName.includes('leaf') || lowerName.includes('leafe');
+                            const isLiquid = lowerName.includes('milk') || lowerName.includes('oil') || lowerName.includes('water') || lowerName.includes('juice') || lowerName.includes('ghee') || lowerName.includes('vinegar') || lowerName.includes('sauce') || lowerName.includes('honey') || lowerName.includes('syrup') || lowerName.includes('liquid') || lowerName.includes('litter') || lowerName.includes('liter') || lowerName.includes('ltr');
+                            if (isLeaf) return 'Pcs';
+                            if (isLiquid) return 'Liter';
+                            return 'Kg';
+                        })(),
                         status: 'Pending',
                         minimum_stock: 10
                     })
@@ -413,7 +429,7 @@ const KitchenPurchase = () => {
             showFeedback("Please enter ingredient name", true);
             return;
         }
-        if (!editingPurchasePortions || parseFloat(editingPurchasePortions) <= 0) {
+        if (editingPurchasePortions === '' || parseFloat(editingPurchasePortions) < 0) {
             showFeedback("Please enter a valid quantity added", true);
             return;
         }
@@ -509,6 +525,13 @@ const KitchenPurchase = () => {
                     .print-only {
                         display: none !important;
                     }
+                    .scrollbar-none::-webkit-scrollbar {
+                        display: none !important;
+                    }
+                    .scrollbar-none {
+                        -ms-overflow-style: none !important;
+                        scrollbar-width: none !important;
+                    }
                 }
                 @media print {
                     body * {
@@ -561,10 +584,10 @@ const KitchenPurchase = () => {
 
                 <div className="flex gap-2">
                     <Button onClick={() => navigate("/restaurant")} variant="glass" icon="🏪">
-                        Restaurant
+                        <span className="hidden sm:inline">Restaurant</span>
                     </Button>
                     <Button onClick={() => navigate("/")} variant="glass" icon="🏠">
-                        Home
+                        <span className="hidden sm:inline">Home</span>
                     </Button>
                 </div>
             </nav>
@@ -585,7 +608,7 @@ const KitchenPurchase = () => {
                 </div>
 
                 {/* Dashboard Stats */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="glass p-4 rounded-2xl border border-white/5 bg-slate-950/20 text-center flex flex-col items-center justify-center">
                         <span className="text-xl">🧺</span>
                         <span className="text-xl font-black text-white mt-0.5">{totalIngredients}</span>
@@ -635,7 +658,7 @@ const KitchenPurchase = () => {
                 )}
 
                 {/* Tab Chooser navigation */}
-                <div className="flex border-b border-white/10 gap-2">
+                <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/10 gap-2 pb-1 scrollbar-none">
                     <button
                         onClick={() => handleTabSelect('overview')}
                         className={`px-6 py-3 font-bold text-sm tracking-wider uppercase border-b-2 transition-all ${
@@ -681,27 +704,27 @@ const KitchenPurchase = () => {
                             <div className="flex flex-col gap-8 animate-fadeIn">
                                 {/* Kitchen Ingredient Inventory Table */}
                                 <div className="flex flex-col gap-4">
-                                    <div className="flex justify-between items-center gap-4">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                         <div className="flex flex-col">
                                             <h3 className="text-lg font-bold text-orange-400 uppercase tracking-wider">Kitchen Ingredient Inventory</h3>
                                             <span className="text-xs text-gray-400 font-semibold hidden md:inline">Manage stock & tomorrow's needs inline</span>
                                         </div>
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-2 w-full sm:w-auto justify-start sm:justify-end">
                                             <Button 
                                                 onClick={() => handlePrintReport('stock')}
                                                 variant="glass" 
                                                 icon="🖨️" 
-                                                className="py-2 px-4 shadow-lg text-xs font-bold uppercase tracking-wider border border-white/5"
+                                                className="py-2 px-4 shadow-lg text-xs font-bold uppercase tracking-wider border border-white/5 flex-1 sm:flex-none"
                                             >
-                                                Print Report
+                                                <span className="hidden sm:inline">Print Report</span>
                                             </Button>
                                             <Button 
                                                 onClick={() => navigate('/kitchen/purchases/new')}
                                                 variant="primary"
                                                 icon="🛒"
-                                                className="py-2 px-4 shadow-lg text-xs font-bold uppercase tracking-wider border border-white/5"
+                                                className="py-2 px-4 shadow-lg text-xs font-bold uppercase tracking-wider border border-white/5 flex-1 sm:flex-none"
                                             >
-                                                Create Purchase
+                                                <span className="hidden sm:inline">Create Purchase</span>
                                             </Button>
                                         </div>
                                     </div>
@@ -711,14 +734,15 @@ const KitchenPurchase = () => {
                                             No kitchen raw ingredients found.
                                         </div>
                                     ) : (
-                                        <div className="glass rounded-2xl border border-white/10 bg-slate-950/20 overflow-hidden shadow-xl">
-                                            <div className="overflow-x-auto">
+                                        <div className="flex flex-col gap-4">
+                                            {/* Desktop View Table */}
+                                            <div className="glass rounded-2xl border border-white/10 bg-slate-950/20 overflow-hidden shadow-xl hidden sm:block">
+                                                <div className="overflow-x-auto">
                                                 <table className="w-full text-left border-collapse">
                                                     <thead>
                                                         <tr className="bg-white/5 text-xs text-orange-400 font-bold border-b border-white/10 uppercase tracking-wider">
                                                             <th className="p-4 text-center w-20">ID</th>
                                                             <th className="p-4">Ingredient Name</th>
-                                                            <th className="p-4">Category</th>
                                                             <th className="p-4 text-center">Status</th>
                                                             <th className="p-4 text-center">Current Stock</th>
                                                             <th className="p-4 text-center">Tomorrow Need</th>
@@ -734,9 +758,6 @@ const KitchenPurchase = () => {
                                                                     <td className="p-4 text-center text-gray-500 font-mono">#{item.id}</td>
                                                                     <td className="p-4 font-bold text-white">
                                                                         {getIngredientIcon(item.name)} {item.name}
-                                                                    </td>
-                                                                    <td className="p-4">
-                                                                        <span className="text-[10px] text-orange-500/80 font-bold uppercase tracking-widest">{item.category}</span>
                                                                     </td>
                                                                     <td className="p-4 text-center">
                                                                         <span className={`text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase border ${status.color}`}>
@@ -817,6 +838,105 @@ const KitchenPurchase = () => {
                                                         })}
                                                     </tbody>
                                                 </table>
+                                            </div>
+                                        </div>
+
+                                        {/* Mobile View Cards */}
+                                        <div className="block sm:hidden flex flex-col gap-3">
+                                            
+                                                {menuItems.map((item) => {
+                                                    const status = getStockStatus(item);
+                                                    const isInlineEditing = inlineEditingId === item.id;
+                                                    return (
+                                                        <div key={item.id} className="glass p-4 rounded-2xl border border-white/10 bg-slate-950/20 flex flex-col gap-3">
+                                                            <div className="flex justify-between items-center">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-gray-500 font-mono text-[10px]">#{item.id}</span>
+                                                                    <h4 className="font-bold text-white text-sm">
+                                                                        {getIngredientIcon(item.name)} {item.name}
+                                                                    </h4>
+                                                                </div>
+                                                                <span className={`text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase border ${status.color}`}>
+                                                                    {status.label}
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="grid grid-cols-2 gap-3 bg-black/20 p-2.5 rounded-xl border border-white/5">
+                                                                <div className="flex flex-col gap-0.5">
+                                                                    <span className="text-[9px] text-gray-400 uppercase font-semibold">Current Stock</span>
+                                                                    {isInlineEditing ? (
+                                                                        <input
+                                                                            type="number"
+                                                                            value={inlineStockValue}
+                                                                            onChange={(e) => setInlineStockValue(e.target.value)}
+                                                                            className="bg-black/60 w-full p-1 text-xs rounded border border-white/20 text-white outline-none focus:border-orange-500 font-bold"
+                                                                            min="0"
+                                                                            step="any"
+                                                                            required
+                                                                        />
+                                                                    ) : (
+                                                                        <span className="text-xs font-black text-orange-400">
+                                                                            {item.stock} <span className="text-[9px] text-gray-400 font-normal">{item.unit}</span>
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+
+                                                                <div className="flex flex-col gap-0.5">
+                                                                    <span className="text-[9px] text-gray-400 uppercase font-semibold">Tomorrow Need</span>
+                                                                    {isInlineEditing ? (
+                                                                        <input
+                                                                            type="number"
+                                                                            value={inlineTomorrowNeedValue}
+                                                                            onChange={(e) => setInlineTomorrowNeedValue(e.target.value)}
+                                                                            className="bg-black/60 w-full p-1 text-xs rounded border border-white/20 text-white outline-none focus:border-orange-500 font-bold"
+                                                                            min="0"
+                                                                            step="any"
+                                                                            required
+                                                                        />
+                                                                    ) : (
+                                                                        <span className="text-xs font-black text-blue-400">
+                                                                            {item.required_quantity} <span className="text-[9px] text-gray-400 font-normal">{item.unit}</span>
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex justify-end gap-2 mt-1">
+                                                                {isInlineEditing ? (
+                                                                    <>
+                                                                        <button
+                                                                            onClick={() => handleInlineStockUpdate(item.id, inlineStockValue, inlineTomorrowNeedValue)}
+                                                                            className="px-3 py-1.5 rounded bg-green-500/20 text-green-400 font-bold text-xs flex-1 flex justify-center items-center gap-1"
+                                                                        >
+                                                                            ✔️ Save
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => setInlineEditingId(null)}
+                                                                            className="px-3 py-1.5 rounded bg-red-500/20 text-red-400 font-bold text-xs flex-1 flex justify-center items-center gap-1"
+                                                                        >
+                                                                            ❌ Cancel
+                                                                        </button>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <button
+                                                                            onClick={() => startInlineEdit(item)}
+                                                                            className="px-3 py-1.5 rounded bg-orange-500/10 hover:bg-orange-500/25 text-orange-400 text-xs font-bold transition-all flex-1 flex justify-center items-center gap-1"
+                                                                        >
+                                                                            ✏️ Edit
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => handleReqDelete(item.id)}
+                                                                            className="px-3 py-1.5 rounded bg-red-500/10 hover:bg-red-500/25 text-red-400 text-xs font-bold transition-all flex-1 flex justify-center items-center gap-1"
+                                                                        >
+                                                                            🗑️ Delete
+                                                                        </button>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}
@@ -929,7 +1049,7 @@ const KitchenPurchase = () => {
                                                             </span>
                                                         </div>
                                                     </div>
-                                                    <div className="overflow-x-auto">
+                                                    <div className="hidden sm:block overflow-x-auto">
                                                         <table className="w-full text-left border-collapse">
                                                             <thead>
                                                                 <tr className="bg-black/20 text-[11px] text-orange-400 font-bold border-b border-white/5 uppercase tracking-wider">
@@ -962,6 +1082,37 @@ const KitchenPurchase = () => {
                                                             </tbody>
                                                         </table>
                                                     </div>
+
+                                                    {/* Mobile View Cards */}
+                                                    <div className="block sm:hidden flex flex-col gap-3 p-4">
+                                                        {group.items.map((log) => {
+                                                            const item = menuItems.find(m => m.name === log.food_name);
+                                                            const isLeaf = (log.food_name || '').toLowerCase().includes('leaf') || (log.food_name || '').toLowerCase().includes('leafe');
+                                                            const unit = isLeaf ? 'Pcs' : (item ? item.unit : 'units');
+                                                            return (
+                                                                <div key={log.id} className="bg-white/5 p-4 rounded-xl border border-white/5 flex flex-col gap-2">
+                                                                    <div className="flex justify-between items-center">
+                                                                        <h4 className="font-bold text-white text-sm">
+                                                                            {getIngredientIcon(log.food_name)} {log.food_name}
+                                                                        </h4>
+                                                                        <span className="text-[10px] text-gray-400">{formatDateTime(log.created_at)}</span>
+                                                                    </div>
+                                                                    <div className="flex justify-between items-center bg-black/20 p-2.5 rounded-lg border border-white/5">
+                                                                        <div className="flex flex-col gap-0.5">
+                                                                            <span className="text-[9px] text-gray-400 uppercase font-semibold">Quantity Deducted</span>
+                                                                            <span className="text-xs font-bold text-orange-400">{log.quantity} {unit}</span>
+                                                                        </div>
+                                                                        <div className="flex flex-col gap-0.5 items-end">
+                                                                            <span className="text-[9px] text-gray-400 uppercase font-semibold">Reason</span>
+                                                                            <span className="px-2 py-0.5 rounded bg-white/5 text-[9px] border border-white/10 text-white font-medium">
+                                                                                {log.reason}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -980,7 +1131,8 @@ const KitchenPurchase = () => {
                                     </div>
 
                                     <div className="glass rounded-2xl border border-white/10 bg-slate-950/20 overflow-hidden">
-                                        <div className="overflow-x-auto">
+                                        {/* Desktop View Table */}
+                                        <div className="hidden sm:block overflow-x-auto">
                                             <table className="w-full text-left border-collapse">
                                                 <thead>
                                                     <tr className="bg-white/5 text-xs text-orange-400 font-bold border-b border-white/10 uppercase tracking-wider">
@@ -1026,22 +1178,68 @@ const KitchenPurchase = () => {
                                                 </tbody>
                                             </table>
                                         </div>
+
+                                        {/* Mobile View Cards */}
+                                        <div className="block sm:hidden flex flex-col gap-3 p-4">
+                                            {menuItems.map((item) => {
+                                                const isLow = item.stock < item.minimum_stock;
+                                                const reqPurchases = Math.max(0, item.required_quantity - item.stock);
+                                                return (
+                                                    <div key={item.id} className="bg-white/5 p-4 rounded-xl border border-white/5 flex flex-col gap-2">
+                                                        <div className="flex justify-between items-center">
+                                                            <h4 className="font-bold text-white text-sm">
+                                                                {getIngredientIcon(item.name)} {item.name}
+                                                            </h4>
+                                                            {isLow ? (
+                                                                <span className="text-[9px] text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded border border-yellow-500/20 font-bold uppercase">REORDER</span>
+                                                            ) : (
+                                                                <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-bold uppercase">SUFFICIENT</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="grid grid-cols-3 gap-2 bg-black/20 p-2.5 rounded-lg border border-white/5 text-center">
+                                                            <div className="flex flex-col gap-0.5">
+                                                                <span className="text-[9px] text-gray-400 uppercase font-semibold">Stock</span>
+                                                                <span className="text-xs font-bold text-gray-300">{item.stock} {item.unit}</span>
+                                                            </div>
+                                                            <div className="flex flex-col gap-0.5 border-x border-white/5">
+                                                                <span className="text-[9px] text-gray-400 uppercase font-semibold">Min Alert</span>
+                                                                <span className="text-xs font-bold text-gray-400">{item.minimum_stock} {item.unit}</span>
+                                                            </div>
+                                                            <div className="flex flex-col gap-0.5">
+                                                                <span className="text-[9px] text-gray-400 uppercase font-semibold">Need</span>
+                                                                <span className="text-xs font-bold text-gray-400">{item.required_quantity} {item.unit}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex justify-between items-center mt-1 px-1">
+                                                            <span className="text-[10px] text-gray-400 font-semibold uppercase">Purchase Required</span>
+                                                            {reqPurchases > 0 ? (
+                                                                <span className="text-xs font-black text-yellow-400 bg-yellow-500/10 px-2.5 py-0.5 rounded border border-yellow-500/20">
+                                                                    +{reqPurchases} {item.unit}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-xs font-bold text-emerald-400">—</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div className="flex flex-col gap-4 animate-fadeIn">
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/50 p-4 rounded-2xl border border-white/10">
+                                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-900/50 p-4 rounded-2xl border border-white/10">
                                         <div>
                                             <h3 className="text-lg font-bold text-orange-400 uppercase tracking-wider">Purchase History Log</h3>
                                             <p className="text-xs text-gray-400 mt-0.5">View and print raw ingredient purchase history grouped day by day.</p>
                                         </div>
-                                        <div className="flex flex-wrap items-center gap-3">
-                                            <div className="flex items-center gap-2">
+                                        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                                            <div className="flex items-center gap-2 flex-grow sm:flex-grow-0">
                                                 <span className="text-xs text-orange-400 font-bold uppercase tracking-wider">📅 Select Day:</span>
                                                 <select
                                                     value={selectedHistoryDate}
                                                     onChange={(e) => setSelectedHistoryDate(e.target.value)}
-                                                    className="bg-black/60 px-3 py-1.5 rounded-xl border border-white/20 text-white text-xs outline-none focus:border-orange-500 font-semibold"
+                                                    className="bg-black/60 px-3 py-1.5 rounded-xl border border-white/20 text-white text-xs outline-none focus:border-orange-500 font-semibold flex-grow"
                                                 >
                                                     <option value="ALL">All Days (Grouped View)</option>
                                                     {uniqueHistoryDates.map(dateStr => (
@@ -1053,17 +1251,17 @@ const KitchenPurchase = () => {
                                                 onClick={() => exportPurchaseCSV(selectedHistoryDate)}
                                                 variant="glass"
                                                 icon="📥"
-                                                className="py-1.5 px-3 shadow-md text-xs font-bold uppercase tracking-wider border border-white/10"
+                                                className="py-1.5 px-3 shadow-md text-xs font-bold uppercase tracking-wider border border-white/10 flex-1 sm:flex-none"
                                             >
-                                                Save / Export CSV
+                                                <span className="hidden sm:inline">Save / Export CSV</span>
                                             </Button>
                                             <Button
                                                 onClick={() => handlePrintReport('purchase')}
                                                 variant="primary"
                                                 icon="🖨️"
-                                                className="py-1.5 px-4 shadow-lg text-xs font-bold uppercase tracking-wider border border-white/10"
+                                                className="py-1.5 px-4 shadow-lg text-xs font-bold uppercase tracking-wider border border-white/10 flex-1 sm:flex-none"
                                             >
-                                                Print History
+                                                <span className="hidden sm:inline">Print History</span>
                                             </Button>
                                         </div>
                                     </div>
@@ -1099,7 +1297,7 @@ const KitchenPurchase = () => {
                                                             </button>
                                                         </div>
                                                     </div>
-                                                    <div className="overflow-x-auto">
+                                                    <div className="hidden sm:block overflow-x-auto">
                                                         <table className="w-full text-left border-collapse">
                                                             <thead>
                                                                 <tr className="bg-black/20 text-[11px] text-orange-400 font-bold border-b border-white/5 uppercase tracking-wider">
@@ -1112,7 +1310,7 @@ const KitchenPurchase = () => {
                                                             </thead>
                                                             <tbody className="text-xs divide-y divide-white/5">
                                                                 {group.items.map((log) => {
-                                                                    const item = menuItems.find(m => m.name === log.food_name);
+                                                                    const item = menuItems.find(m => m.name.toLowerCase() === log.food_name.toLowerCase());
                                                                     const unit = item ? item.unit : 'units';
                                                                     const isEditing = editingPurchaseId === log.id;
                                                                     return (
@@ -1139,7 +1337,7 @@ const KitchenPurchase = () => {
                                                                                             value={editingPurchasePortions}
                                                                                             onChange={(e) => setEditingPurchasePortions(e.target.value)}
                                                                                             className="bg-black/60 p-1.5 text-xs rounded border border-white/20 text-white outline-none focus:border-orange-500 font-bold w-20 text-center"
-                                                                                            min="0.1"
+                                                                                            min="0"
                                                                                             step="any"
                                                                                             required
                                                                                         />
@@ -1211,6 +1409,109 @@ const KitchenPurchase = () => {
                                                             </tbody>
                                                         </table>
                                                     </div>
+
+                                                    {/* Mobile View Cards */}
+                                                    <div className="block sm:hidden flex flex-col gap-3 p-4">
+                                                        {group.items.map((log) => {
+                                                            const item = menuItems.find(m => m.name.toLowerCase() === log.food_name.toLowerCase());
+                                                            const unit = item ? item.unit : 'units';
+                                                            const isEditing = editingPurchaseId === log.id;
+                                                            return (
+                                                                <div key={log.id} className="bg-white/5 p-4 rounded-xl border border-white/5 flex flex-col gap-2">
+                                                                    <div className="flex justify-between items-center">
+                                                                        {isEditing ? (
+                                                                            <input
+                                                                                type="text"
+                                                                                value={editingPurchaseFoodName}
+                                                                                onChange={(e) => setEditingPurchaseFoodName(e.target.value)}
+                                                                                className="bg-black/60 p-1 px-2 text-xs rounded border border-white/20 text-white outline-none focus:border-orange-500 font-bold flex-1 mr-2"
+                                                                                required
+                                                                            />
+                                                                        ) : (
+                                                                            <h4 className="font-bold text-white text-sm">
+                                                                                {getIngredientIcon(log.food_name)} {log.food_name}
+                                                                            </h4>
+                                                                        )}
+                                                                        <span className="text-[10px] text-gray-400">{formatDateTime(log.created_at)}</span>
+                                                                    </div>
+                                                                    <div className="grid grid-cols-2 gap-3 bg-black/20 p-2.5 rounded-lg border border-white/5">
+                                                                        <div className="flex flex-col gap-0.5">
+                                                                            <span className="text-[9px] text-gray-400 uppercase font-semibold">Quantity Added</span>
+                                                                            {isEditing ? (
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <span className="text-emerald-400 font-bold text-xs">+</span>
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        value={editingPurchasePortions}
+                                                                                        onChange={(e) => setEditingPurchasePortions(e.target.value)}
+                                                                                        className="bg-black/60 w-16 p-1 text-xs rounded border border-white/20 text-white text-center font-bold"
+                                                                                        min="0"
+                                                                                        step="any"
+                                                                                        required
+                                                                                    />
+                                                                                    <span className="text-gray-400 text-[9px]">{unit}</span>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <span className="text-xs font-bold text-emerald-400">+{log.portions_added} {unit}</span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="flex flex-col gap-0.5 items-end">
+                                                                            <span className="text-[9px] text-gray-400 uppercase font-semibold">Cost amount</span>
+                                                                            {isEditing ? (
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <span className="text-gray-400 text-xs">₹</span>
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        value={editingPurchaseAmount}
+                                                                                        onChange={(e) => setEditingPurchaseAmount(e.target.value)}
+                                                                                        className="bg-black/60 w-20 p-1 text-xs rounded border border-white/20 text-white text-right font-bold"
+                                                                                        min="0"
+                                                                                        step="any"
+                                                                                        required
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <span className="text-xs font-black text-white">₹{log.amount}</span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex justify-end gap-2 mt-1">
+                                                                        {isEditing ? (
+                                                                            <>
+                                                                                <button
+                                                                                    onClick={() => handleSavePurchaseEdit(log.id)}
+                                                                                    className="px-3 py-1 rounded bg-green-500/20 text-green-400 font-bold text-xs flex-1 flex justify-center items-center gap-1"
+                                                                                >
+                                                                                    ✔️ Save
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={cancelEditingPurchase}
+                                                                                    className="px-3 py-1 rounded bg-white/10 text-white font-bold text-xs flex-1 flex justify-center items-center gap-1"
+                                                                                >
+                                                                                    ❌ Cancel
+                                                                                </button>
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <button
+                                                                                    onClick={() => startEditingPurchase(log)}
+                                                                                    className="px-3 py-1 rounded bg-orange-500/10 hover:bg-orange-500/25 text-orange-400 text-xs font-bold transition-all flex-1"
+                                                                                >
+                                                                                    ✏️ Edit
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => handleDeletePurchaseLog(log.id, log.food_name)}
+                                                                                    className="px-3 py-1 rounded bg-red-500/10 hover:bg-red-500/25 text-red-400 text-xs font-bold transition-all flex-1"
+                                                                                >
+                                                                                    🗑️ Delete
+                                                                                </button>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -1242,7 +1543,6 @@ const KitchenPurchase = () => {
                             <thead>
                                 <tr>
                                     <th>Ingredient Name</th>
-                                    <th>Category</th>
                                     <th style={{ textAlign: 'center' }}>Current Stock</th>
                                     <th style={{ textAlign: 'center' }}>Tomorrow Need</th>
                                     <th style={{ textAlign: 'right' }}>Purchase Required</th>
@@ -1256,7 +1556,6 @@ const KitchenPurchase = () => {
                                     return (
                                         <tr key={item.id}>
                                             <td style={{ fontWeight: 'bold' }}>{item.name}</td>
-                                            <td>{item.category}</td>
                                             <td style={{ textAlign: 'center' }}>{item.stock} {item.unit}</td>
                                             <td style={{ textAlign: 'center' }}>{item.required_quantity} {item.unit}</td>
                                             <td style={{ textAlign: 'right' }} className={reqPurchases > 0 ? 'deficit-highlight' : ''}>

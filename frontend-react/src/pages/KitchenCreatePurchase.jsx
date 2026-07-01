@@ -27,15 +27,28 @@ const KitchenCreatePurchase = () => {
             const res = await fetch(`${API_URL}/restaurant/kitchen-requirements`);
             const data = await res.json();
             if (data.success) {
-                const mappedItems = (data.data || []).map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    category: item.category,
-                    stock: parseFloat(item.current_stock) || 0,
-                    required_quantity: parseFloat(item.required_quantity) || 0,
-                    minimum_stock: parseFloat(item.minimum_stock) || 10,
-                    unit: item.unit || 'Kg',
-                }));
+                const mappedItems = (data.data || []).map(item => {
+                    const lowerName = (item.name || '').toLowerCase();
+                    const isLeaf = lowerName.includes('leaf') || lowerName.includes('leafe');
+                    const isLiquid = lowerName.includes('milk') || lowerName.includes('oil') || lowerName.includes('water') || lowerName.includes('juice') || lowerName.includes('ghee') || lowerName.includes('vinegar') || lowerName.includes('sauce') || lowerName.includes('honey') || lowerName.includes('syrup') || lowerName.includes('liquid') || lowerName.includes('litter') || lowerName.includes('liter') || lowerName.includes('ltr');
+                    
+                    let resolvedUnit = item.unit || 'Kg';
+                    if (isLeaf) {
+                        resolvedUnit = 'Pcs';
+                    } else if (isLiquid && resolvedUnit === 'Kg') {
+                        resolvedUnit = 'Liter';
+                    }
+
+                    return {
+                        id: item.id,
+                        name: item.name,
+                        category: item.category,
+                        stock: parseFloat(item.current_stock) || 0,
+                        required_quantity: parseFloat(item.required_quantity) || 0,
+                        minimum_stock: parseFloat(item.minimum_stock) || 10,
+                        unit: resolvedUnit,
+                    };
+                });
                 setMenuItems(mappedItems);
             }
         } catch (err) {
@@ -60,7 +73,7 @@ const KitchenCreatePurchase = () => {
             showFeedback("Please enter or select an item", true);
             return;
         }
-        if (!portionsToAdd || parseFloat(portionsToAdd) <= 0) {
+        if (portionsToAdd === '' || parseFloat(portionsToAdd) < 0) {
             showFeedback("Please enter a valid stock quantity", true);
             return;
         }
@@ -88,7 +101,14 @@ const KitchenCreatePurchase = () => {
                         category: 'Others',
                         current_stock: 0,
                         required_quantity: parseFloat(addTomorrowNeed) || 0,
-                        unit: 'Kg',
+                        unit: (function() {
+                            const lowerName = nameToUse.toLowerCase();
+                            const isLeaf = lowerName.includes('leaf') || lowerName.includes('leafe');
+                            const isLiquid = lowerName.includes('milk') || lowerName.includes('oil') || lowerName.includes('water') || lowerName.includes('juice') || lowerName.includes('ghee') || lowerName.includes('vinegar') || lowerName.includes('sauce') || lowerName.includes('honey') || lowerName.includes('syrup') || lowerName.includes('liquid') || lowerName.includes('litter') || lowerName.includes('liter') || lowerName.includes('ltr');
+                            if (isLeaf) return 'Pcs';
+                            if (isLiquid) return 'Liter';
+                            return 'Kg';
+                        })(),
                         status: 'Pending',
                         minimum_stock: 10
                     })
@@ -180,10 +200,10 @@ const KitchenCreatePurchase = () => {
 
                 <div className="flex gap-2">
                     <Button onClick={() => navigate("/kitchen/purchases")} variant="glass" icon="📋">
-                        Stock Overview
+                        <span className="hidden sm:inline">Stock Overview</span>
                     </Button>
                     <Button onClick={() => navigate("/")} variant="glass" icon="🏠">
-                        Home
+                        <span className="hidden sm:inline">Home</span>
                     </Button>
                 </div>
             </nav>
@@ -200,7 +220,7 @@ const KitchenCreatePurchase = () => {
                 </button>
 
                 {/* Form Card */}
-                <div className="glass p-8 rounded-3xl border border-white/10 bg-slate-950/40 backdrop-blur-xl shadow-2xl flex flex-col gap-6 animate-fadeIn">
+                <div className="glass p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-white/10 bg-slate-950/40 backdrop-blur-xl shadow-2xl flex flex-col gap-6 animate-fadeIn">
                     <div>
                         <h2 className="text-2xl font-extrabold text-orange-500 tracking-wider">
                             🛒 Create New Purchase
@@ -254,7 +274,7 @@ const KitchenCreatePurchase = () => {
                                     onChange={(e) => setPortionsToAdd(e.target.value)}
                                     className="bg-black/40 p-3.5 rounded-xl border border-white/10 text-white placeholder-gray-500 outline-none focus:border-orange-500 w-full text-xs font-bold"
                                     required
-                                    min="0.1"
+                                    min="0"
                                     step="any"
                                 />
                             </div>
@@ -284,12 +304,12 @@ const KitchenCreatePurchase = () => {
                                 />
                             </div>
 
-                            <div className="flex gap-3 justify-end mt-4">
+                            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end mt-4">
                                 <Button 
                                     type="button" 
                                     onClick={() => navigate('/kitchen/purchases')}
                                     variant="glass" 
-                                    className="py-3 px-6 text-xs uppercase tracking-wider"
+                                    className="py-3 px-6 text-xs uppercase tracking-wider w-full sm:w-auto"
                                 >
                                     Cancel
                                 </Button>
@@ -297,7 +317,7 @@ const KitchenCreatePurchase = () => {
                                     type="submit" 
                                     variant="primary" 
                                     icon="➕" 
-                                    className="py-3 px-6 shadow-lg shadow-orange-500/20 text-xs uppercase tracking-wider font-bold"
+                                    className="py-3 px-6 shadow-lg shadow-orange-500/20 text-xs uppercase tracking-wider font-bold w-full sm:w-auto"
                                 >
                                     Log Restock & Purchase
                                 </Button>
