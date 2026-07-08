@@ -208,6 +208,26 @@ const deleteKitchenPurchaseLog = async (id) => {
 };
 
 /**
+ * Delete a usage log entry and adjust stock accordingly
+ */
+const deleteKitchenUsageLog = async (id) => {
+  const existingRes = await pool.query("SELECT * FROM kitchen_usage_log WHERE id = $1", [id]);
+  if (existingRes.rows.length === 0) return null;
+  const existingLog = existingRes.rows[0];
+
+  await pool.query("DELETE FROM kitchen_usage_log WHERE id = $1", [id]);
+
+  // Adjust stock in kitchen_purchase_requirements (restore the deducted quantity)
+  await pool.query(
+    "UPDATE kitchen_purchase_requirements SET current_stock = current_stock + $1, updated_at = CURRENT_TIMESTAMP WHERE LOWER(name) = LOWER($2)",
+    [existingLog.quantity, existingLog.food_name]
+  );
+
+  return existingLog;
+};
+
+
+/**
  * Update a purchase log entry and rebalance stock
  */
 const updateKitchenPurchaseLog = async (id, food_name, portions_added, amount) => {
@@ -260,5 +280,6 @@ module.exports = {
   getKitchenPurchaseLog,
   addKitchenStockAndLogPurchase,
   deleteKitchenPurchaseLog,
-  updateKitchenPurchaseLog
+  updateKitchenPurchaseLog,
+  deleteKitchenUsageLog
 };

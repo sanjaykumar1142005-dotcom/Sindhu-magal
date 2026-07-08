@@ -22,10 +22,10 @@ const KitchenPurchase = () => {
     };
 
 
+
+
     // Tab 2: Usage Form State
-    const [selectedUsageFoodName, setSelectedUsageFoodName] = useState('');
-    const [usageQuantity, setUsageQuantity] = useState('');
-    const [usageReason, setUsageReason] = useState('Dinner service');
+
 
     // Inline quick edit states
     const [inlineEditingId, setInlineEditingId] = useState(null);
@@ -121,95 +121,9 @@ const KitchenPurchase = () => {
     };
 
 
-    // Tab 2: Submit Usage Entry
-    const handleUsageSubmit = async (e) => {
-        e.preventDefault();
 
-        if (!selectedUsageFoodName || selectedUsageFoodName.trim() === '') {
-            showFeedback("Please enter or select an item", true);
-            return;
-        }
-        if (!usageQuantity || parseFloat(usageQuantity) <= 0) {
-            showFeedback("Please enter a valid quantity", true);
-            return;
-        }
-        if (!usageReason) {
-            showFeedback("Please specify a reason", true);
-            return;
-        }
 
-        const nameToUse = selectedUsageFoodName.trim();
-        const selectedItem = menuItems.find(m => m.name.toLowerCase() === nameToUse.toLowerCase());
 
-        if (selectedItem && selectedItem.stock < parseFloat(usageQuantity)) {
-            if (!window.confirm(`Warning: Selected usage (${usageQuantity} ${selectedItem.unit}) exceeds current stock (${selectedItem.stock} ${selectedItem.unit}). Proceed anyway?`)) {
-                return;
-            }
-        }
-
-        try {
-            let finalFoodName = nameToUse;
-
-            if (!selectedItem) {
-                // Create a new requirement item in the database first
-                const reqRes = await fetch(`${API_URL}/restaurant/kitchen-requirements`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: nameToUse,
-                        category: 'Others',
-                        current_stock: 0,
-                        required_quantity: 0,
-                        unit: (function() {
-                            const lowerName = nameToUse.toLowerCase();
-                            const isLeaf = lowerName.includes('leaf') || lowerName.includes('leafe');
-                            const isLiquid = lowerName.includes('milk') || lowerName.includes('oil') || lowerName.includes('water') || lowerName.includes('juice') || lowerName.includes('ghee') || lowerName.includes('vinegar') || lowerName.includes('sauce') || lowerName.includes('honey') || lowerName.includes('syrup') || lowerName.includes('liquid') || lowerName.includes('litter') || lowerName.includes('liter') || lowerName.includes('ltr');
-                            if (isLeaf) return 'Pcs';
-                            if (isLiquid) return 'Liter';
-                            return 'Kg';
-                        })(),
-                        status: 'Pending',
-                        minimum_stock: 10
-                    })
-                });
-                const reqData = await reqRes.json();
-                if (reqData.success && reqData.data) {
-                    finalFoodName = reqData.data.name;
-                } else {
-                    showFeedback("Failed to initialize new kitchen ingredient for usage", true);
-                    return;
-                }
-            }
-
-            const res = await fetch(`${API_URL}/kitchen/stock/usage`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    food_name: finalFoodName,
-                    quantity: parseFloat(usageQuantity),
-                    reason: usageReason
-                })
-            });
-
-            const data = await res.json();
-            if (data.success) {
-                showFeedback("Daily kitchen usage logged successfully!");
-                setSelectedUsageFoodName('');
-                setUsageQuantity('');
-                setUsageReason('Dinner service');
-                fetchAllData();
-            } else {
-                showFeedback(data.message || "Failed to log kitchen usage", true);
-            }
-        } catch (err) {
-            console.error("Error logging kitchen usage:", err);
-            showFeedback("Server error.", true);
-        }
-    };
 
     // Tab 1: Inline Stock Update (direct override)
     const handleInlineStockUpdate = async (id, stockVal, tomorrowVal) => {
@@ -292,6 +206,24 @@ const KitchenPurchase = () => {
             });
         } catch (e) {
             return isoString;
+        }
+    };
+
+    const handleUsageDelete = async (id) => {
+        try {
+            const res = await fetch(`${API_URL}/kitchen/stock/usage/${id}`, {
+                method: 'DELETE'
+            });
+            const data = await res.json();
+            if (data.success) {
+                showFeedback("Usage record deleted successfully! 🗑️");
+                fetchAllData();
+            } else {
+                showFeedback(data.message || "Failed to delete usage record", true);
+            }
+        } catch (err) {
+            console.error("Error deleting usage record:", err);
+            showFeedback("Server error.", true);
         }
     };
 
@@ -701,10 +633,10 @@ const KitchenPurchase = () => {
                     <div>
                         {/* Tab 1: Current Stock View */}
                         {activeTab === 'overview' && (
-                            <div className="flex flex-col gap-8 animate-fadeIn">
-                                {/* Kitchen Ingredient Inventory Table */}
-                                <div className="flex flex-col gap-4">
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div className="flex flex-col gap-4 animate-fadeIn">
+                                {/* Right inventory list column */}
+                                <div className="w-full flex flex-col gap-4">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/50 p-4 rounded-2xl border border-white/10">
                                         <div className="flex flex-col">
                                             <h3 className="text-lg font-bold text-orange-400 uppercase tracking-wider">Kitchen Ingredient Inventory</h3>
                                             <span className="text-xs text-gray-400 font-semibold hidden md:inline">Manage stock & tomorrow's needs inline</span>
@@ -714,7 +646,7 @@ const KitchenPurchase = () => {
                                                 onClick={() => handlePrintReport('stock')}
                                                 variant="glass" 
                                                 icon="🖨️" 
-                                                className="py-2 px-4 shadow-lg text-xs font-bold uppercase tracking-wider border border-white/5 flex-1 sm:flex-none"
+                                                className="py-2 px-4 shadow-lg text-xs font-bold uppercase tracking-wider border border-white/5 flex-grow sm:flex-grow-0"
                                             >
                                                 <span className="hidden sm:inline">Print Report</span>
                                             </Button>
@@ -722,7 +654,7 @@ const KitchenPurchase = () => {
                                                 onClick={() => navigate('/kitchen/purchases/new')}
                                                 variant="primary"
                                                 icon="🛒"
-                                                className="py-2 px-4 shadow-lg text-xs font-bold uppercase tracking-wider border border-white/5 flex-1 sm:flex-none"
+                                                className="py-2 px-4 shadow-lg text-xs font-bold uppercase tracking-wider border border-white/5 flex-grow sm:flex-grow-0"
                                             >
                                                 <span className="hidden sm:inline">Create Purchase</span>
                                             </Button>
@@ -946,85 +878,35 @@ const KitchenPurchase = () => {
 
                         {/* Tab 2: Daily Usage Entry */}
                         {activeTab === 'usage' && (
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start animate-fadeIn">
-                                <div className="lg:col-span-1 glass p-6 rounded-3xl border border-white/10 bg-slate-950/40 backdrop-blur-xl shadow-2xl flex flex-col gap-5">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-white tracking-wide">Usage Entry</h3>
-                                        <p className="text-gray-400 text-xs mt-1">Deduct raw ingredient quantities from kitchen inventory.</p>
-                                    </div>
-
-                                    <form onSubmit={handleUsageSubmit} className="flex flex-col gap-4">
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-xs font-semibold uppercase tracking-wider text-orange-400">Enter Item</label>
-                                            <input
-                                                list="usage-items-list"
-                                                value={selectedUsageFoodName}
-                                                onChange={(e) => setSelectedUsageFoodName(e.target.value)}
-                                                placeholder="-- Enter or Choose Item --"
-                                                className="bg-black/40 p-3 rounded-xl border border-white/10 text-white outline-none focus:border-orange-500 w-full text-xs"
-                                                required
-                                            />
-                                            <datalist id="usage-items-list">
-                                                {menuItems.map(item => (
-                                                    <option key={item.id} value={item.name} />
-                                                ))}
-                                            </datalist>
-                                        </div>
-
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-xs font-semibold uppercase tracking-wider text-orange-400">Quantity Deducted</label>
-                                            <input
-                                                type="number"
-                                                placeholder="Enter quantity"
-                                                value={usageQuantity}
-                                                onChange={(e) => setUsageQuantity(e.target.value)}
-                                                className="bg-black/40 p-3 rounded-xl border border-white/10 text-white placeholder-gray-500 outline-none focus:border-orange-500 w-full text-xs"
-                                                required
-                                                min="0.1"
-                                                step="any"
-                                            />
-                                        </div>
-
-                                        <div className="flex flex-col gap-1.5">
-                                            <label className="text-xs font-semibold uppercase tracking-wider text-orange-400">Reason / Description</label>
-                                            <select
-                                                value={usageReason}
-                                                onChange={(e) => setUsageReason(e.target.value)}
-                                                className="bg-black/40 p-3 rounded-xl border border-white/10 text-white outline-none focus:border-orange-500 w-full text-xs"
-                                                required
-                                            >
-                                                <option value="Dinner service">Dinner service usage</option>
-                                                <option value="Catering event">Catering event</option>
-                                                <option value="Staff food">Staff meals</option>
-                                                <option value="Kitchen waste / Spill">Kitchen waste / Spill</option>
-                                                <option value="Spoiled / Expired">Spoiled / Expired</option>
-                                            </select>
-                                        </div>
-
-                                        <Button type="submit" variant="primary" icon="➖" className="py-3 shadow-lg mt-2 font-bold uppercase tracking-wider">
-                                            Record Usage
-                                        </Button>
-                                    </form>
-                                </div>
-
-                                <div className="lg:col-span-2 flex flex-col gap-4">
+                            <div className="flex flex-col gap-6 animate-fadeIn">
+                                <div className="w-full flex flex-col gap-4">
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/50 p-4 rounded-2xl border border-white/10">
                                         <div>
                                             <h3 className="text-lg font-bold text-orange-400 uppercase tracking-wider">Usage History Log</h3>
                                             <p className="text-xs text-gray-400 mt-0.5">Kitchen raw ingredient usage logs grouped day by day.</p>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs text-orange-400 font-bold uppercase tracking-wider">📅 Select Day:</span>
-                                            <select
-                                                value={selectedUsageDate}
-                                                onChange={(e) => setSelectedUsageDate(e.target.value)}
-                                                className="bg-black/60 px-3 py-1.5 rounded-xl border border-white/20 text-white text-xs outline-none focus:border-orange-500 font-semibold"
+                                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-orange-400 font-bold uppercase tracking-wider">📅 Select Day:</span>
+                                                <select
+                                                    value={selectedUsageDate}
+                                                    onChange={(e) => setSelectedUsageDate(e.target.value)}
+                                                    className="bg-black/60 px-3 py-1.5 rounded-xl border border-white/20 text-white text-xs outline-none focus:border-orange-500 font-semibold"
+                                                >
+                                                    <option value="ALL">All Days (Grouped View)</option>
+                                                    {uniqueUsageDates.map(dateStr => (
+                                                        <option key={dateStr} value={dateStr}>{dateStr}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <Button 
+                                                onClick={() => navigate('/kitchen/usage/new')}
+                                                variant="primary"
+                                                icon="🥣"
+                                                className="py-2 px-4 shadow-lg text-xs font-bold uppercase tracking-wider border border-white/5"
                                             >
-                                                <option value="ALL">All Days (Grouped View)</option>
-                                                {uniqueUsageDates.map(dateStr => (
-                                                    <option key={dateStr} value={dateStr}>{dateStr}</option>
-                                                ))}
-                                            </select>
+                                                <span>Record Usage</span>
+                                            </Button>
                                         </div>
                                     </div>
                                     
@@ -1057,6 +939,7 @@ const KitchenPurchase = () => {
                                                                     <th className="p-3.5 text-center">Quantity Deducted</th>
                                                                     <th className="p-3.5">Reason</th>
                                                                     <th className="p-3.5 text-center">Date & Time</th>
+                                                                    <th className="p-3.5 text-center">Actions</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody className="text-xs divide-y divide-white/5">
@@ -1076,6 +959,14 @@ const KitchenPurchase = () => {
                                                                                 </span>
                                                                             </td>
                                                                             <td className="p-3.5 text-center text-gray-400">{formatDateTime(log.created_at)}</td>
+                                                                            <td className="p-3.5 text-center">
+                                                                                <button
+                                                                                    onClick={() => handleUsageDelete(log.id)}
+                                                                                    className="px-2.5 py-1 rounded bg-red-500/10 hover:bg-red-500/25 text-red-400 text-[10px] font-extrabold transition-all duration-200 border border-red-500/20"
+                                                                                >
+                                                                                    🗑️ Delete
+                                                                                </button>
+                                                                            </td>
                                                                         </tr>
                                                                     );
                                                                 })}
@@ -1109,6 +1000,14 @@ const KitchenPurchase = () => {
                                                                             </span>
                                                                         </div>
                                                                     </div>
+                                                                    <div className="flex justify-end mt-1">
+                                                                        <button
+                                                                            onClick={() => handleUsageDelete(log.id)}
+                                                                            className="px-3 py-1 rounded bg-red-500/10 hover:bg-red-500/25 text-red-400 text-[10px] font-extrabold transition-all duration-200 border border-red-500/20"
+                                                                        >
+                                                                            🗑️ Delete Log
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
                                                             );
                                                         })}
@@ -1118,7 +1017,8 @@ const KitchenPurchase = () => {
                                         </div>
                                     )}
                                 </div>
-                            </div>
+
+                                </div>
                         )}
 
                         {/* Tab 3: Reorder Math & Purchases */}

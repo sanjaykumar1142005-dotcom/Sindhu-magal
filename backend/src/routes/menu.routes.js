@@ -14,6 +14,7 @@ router.delete("/admin/menu/:id", adminMiddleware, menuController.deleteMenuItem)
 router.post("/kitchen/stock", menuController.updateStock);
 router.get("/kitchen/stock/usage", menuController.getUsageLog);
 router.post("/kitchen/stock/usage", menuController.createUsage);
+router.delete("/kitchen/stock/usage/:id", menuController.deleteUsageLog);
 router.get("/kitchen/stock/purchases", menuController.getPurchaseLog);
 router.post("/kitchen/stock/purchase", menuController.logPurchaseAndAddStock);
 router.put("/kitchen/stock/purchases/:id", menuController.updatePurchaseLog);

@@ -206,6 +206,24 @@ const deletePurchaseLog = async (req, res, next) => {
   }
 };
 
+/**
+ * Delete kitchen usage log entry
+ */
+const deleteUsageLog = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const deletedLog = await menuService.deleteKitchenUsageLog(id);
+    if (!deletedLog) {
+      return errorResponse(res, "Usage log not found", null, 404);
+    }
+
+    return successResponse(res, "Usage log deleted successfully 🗑️", { data: deletedLog });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 module.exports = {
   getMenu,
   saveMenuItem,
@@ -216,5 +234,6 @@ module.exports = {
   getPurchaseLog,
   logPurchaseAndAddStock,
   updatePurchaseLog,
-  deletePurchaseLog
+  deletePurchaseLog,
+  deleteUsageLog
 };

@@ -12,6 +12,7 @@ import RestaurantAdmin from './pages/RestaurantAdmin';
 import RestaurantPurchase from './pages/RestaurantPurchase';
 import KitchenPurchase from './pages/KitchenPurchase';
 import KitchenCreatePurchase from './pages/KitchenCreatePurchase';
+import KitchenCreateUsage from './pages/KitchenCreateUsage';
 import RestaurantInventory from './pages/RestaurantInventory';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         <Route path="/restaurant/inventory" element={<RestaurantInventory />} />
         <Route path="/kitchen/purchases" element={<KitchenPurchase />} />
         <Route path="/kitchen/purchases/new" element={<KitchenCreatePurchase />} />
+        <Route path="/kitchen/usage/new" element={<KitchenCreateUsage />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/catering" element={<CateringAdmin />} />
         <Route path="/restaurant/menu-admin" element={<RestaurantAdmin />} />
